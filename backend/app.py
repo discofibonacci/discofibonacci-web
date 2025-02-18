@@ -8,6 +8,11 @@ CORS(app)  # Enable CORS
 def home():
     return "Backend is running!"
 
+# ✅ ADD A HEALTH CHECK ROUTE FOR RENDER
+@app.route("/healthz")
+def health_check():
+    return jsonify({"status": "ok"}), 200
+
 @app.route("/alert", methods=["POST"])
 def alert():
     data = request.json
