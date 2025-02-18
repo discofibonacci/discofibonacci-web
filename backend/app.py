@@ -20,6 +20,6 @@ def alert():
     return jsonify({"status": "success"}), 200
 
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 10000))  # Use environment variable PORT if available
-    app.run(debug=True, host="0.0.0.0", port=port)  # Explicitly bind to port
+    from waitress import serve  # Production WSGI server
+    serve(app, host="0.0.0.0", port=10000)  # Bind to 10000
+
