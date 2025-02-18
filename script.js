@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     console.log("Market Maker Sniper Loaded");
 
     function sendTestAlert() {
-        fetch("https://your-backend-service.onrender.com/alert", {
+        fetch("https://discofibonacci-web.onrender.com/alert", {
  // Updated URL
             method: "POST",
             headers: { "Content-Type": "application/json" },
