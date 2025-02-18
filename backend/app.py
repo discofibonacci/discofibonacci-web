@@ -1,6 +1,7 @@
 import yahoo_fin.stock_info as si
 import pandas as pd
 import requests
+import requests_html
 from io import StringIO
 
 # Fix Yahoo Finance's broken get_quote_table function
