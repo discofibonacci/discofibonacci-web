@@ -20,6 +20,10 @@ def get_order_flow(symbol):
     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={ALPHA_VANTAGE_API_KEY}"
     try:
         response = requests.get(url).json()
+        
+        # Debugging: Print full response in logs
+        print(f"🔍 API Response for {symbol}: {response}")
+
         if "Time Series (5min)" in response:
             latest_timestamp = max(response["Time Series (5min)"].keys())
             latest_data = response["Time Series (5min)"][latest_timestamp]
@@ -31,8 +35,11 @@ def get_order_flow(symbol):
                 "volume": latest_data["5. volume"]
             }
         else:
+            print(f"⚠️ No 'Time Series (5min)' data found in API response for {symbol}")
             return {"error": "No valid order flow data found."}
+    
     except Exception as e:
+        print(f"❌ Error fetching order flow for {symbol}: {str(e)}")
         return {"error": f"Failed to fetch order flow: {str(e)}"}
 
 # Optimized Support Level Detection (3-month period)
