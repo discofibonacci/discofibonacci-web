@@ -3,6 +3,9 @@ import yfinance as yf
 import requests
 
 app = Flask(__name__)
+@app.route('/healthz')
+def health_check():
+    return jsonify({"status": "ok"}), 200  # Health check returns a 200 OK
 
 # Liquidity & Order Flow Tracking
 def get_order_flow(symbol):
