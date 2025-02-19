@@ -1,20 +1,20 @@
 import os
+import requests
+import yfinance as yf
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import yfinance as yf
-import requests
 
+# Initialize Flask App
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "https://discofibonacci.github.io"}})
 
-# Health Check
-@app.route('/healthz')
+# Alpha Vantage API Key
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+
 def health_check():
     return jsonify({"status": "ok"}), 200
 
-# Order Flow via Alpha Vantage
-ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
-
+# Liquidity & Order Flow Tracking
 def get_order_flow(symbol):
     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={ALPHA_VANTAGE_API_KEY}"
     try:
@@ -49,15 +49,15 @@ def get_rsi(symbol):
     try:
         data = yf.Ticker(symbol).history(period="1mo")
         if data.empty or 'Close' not in data.columns:
-            return "N/A"
+            return 0  # Ensure numerical return to avoid frontend errors
         delta = data['Close'].diff()
         gain = (delta.where(delta > 0, 0)).rolling(14).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
         rs = gain / loss
         rsi = 100 - (100 / (1 + rs))
-        return round(rsi.iloc[-1], 2) if not rsi.isna().iloc[-1] else "N/A"
+        return round(rsi.iloc[-1], 2) if not rsi.isna().iloc[-1] else 0
     except Exception as e:
-        return "N/A"
+        return 0
 
 @app.route("/market-data", methods=["GET"])
 def market_data():
@@ -65,7 +65,6 @@ def market_data():
     order_flow = get_order_flow(symbol)
     support_level = get_support_levels(symbol)
     rsi = get_rsi(symbol)
-
     return jsonify({
         "symbol": symbol,
         "order_flow": order_flow,
@@ -73,7 +72,6 @@ def market_data():
         "rsi": rsi
     })
 
-# Fix the port binding issue for Render
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))  # Render dynamically assigns a PORT
+    port = int(os.environ.get("PORT", 10000))  # Ensure correct port binding for Render
     app.run(host="0.0.0.0", port=port)
