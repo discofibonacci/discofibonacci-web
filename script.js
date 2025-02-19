@@ -1,17 +1,11 @@
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("Market Maker Sniper Loaded");
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("fetchData").addEventListener("click", async function () {
+        const symbol = document.getElementById("symbolInput").value || "AAPL";
+        const response = await fetch(`/market-data?symbol=${symbol}`);
+        const data = await response.json();
 
-    function sendTestAlert() {
-        fetch("https://discofibonacci-web.onrender.com/alert", {
- // Updated URL
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ "message": "Test Alert Triggered!" })
-        })
-        .then(response => response.json())
-        .then(data => console.log("Server Response:", data))
-        .catch(error => console.error("Error:", error));
-    }
-
-    setTimeout(sendTestAlert, 5000);
+        document.getElementById("orderFlow").textContent = JSON.stringify(data.order_flow, null, 2);
+        document.getElementById("supportLevel").textContent = data.support_level;
+        document.getElementById("rsi").textContent = data.rsi.toFixed(2);
+    });
 });

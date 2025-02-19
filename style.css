@@ -1,9 +1,47 @@
 body {
-    font-family: Arial, sans-serif;
+    background: black;
+    color: white;
+    font-family: 'Arial', sans-serif;
     text-align: center;
-    background-color: #111;
-    color: #fff;
 }
-h1 {
-    color: #f39c12;
+
+.neon-text {
+    font-size: 3rem;
+    text-transform: uppercase;
+    color: cyan;
+    text-shadow: 0 0 5px cyan, 0 0 10px blue;
+    animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 5px cyan, 0 0 10px blue; }
+    to { text-shadow: 0 0 10px cyan, 0 0 20px blue; }
+}
+
+.container {
+    padding: 20px;
+}
+
+.dashboard input, .dashboard button {
+    font-size: 1.2rem;
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+}
+
+.dashboard button {
+    background: cyan;
+    color: black;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.data-box {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0 0 10px cyan;
 }

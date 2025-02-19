@@ -3,12 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Market Maker Sniper</title>
+    <title>DiscoFibonacci 2.0</title>
     <link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Market Maker Sniper Web App</h1>
-    <div id="alerts"></div>
+    <div class="container">
+        <h1 class="neon-text">DiscoFibonacci 2.0</h1>
+        <p class="subtext">The Ultimate Market Maker Sniper Tool</p>
+        
+        <div class="dashboard">
+            <input type="text" id="symbolInput" placeholder="Enter Stock Symbol">
+            <button id="fetchData">Get Market Data</button>
+        </div>
+
+        <div id="market-data" class="data-box">
+            <h3>Market Data</h3>
+            <p><strong>Order Flow:</strong> <span id="orderFlow"></span></p>
+            <p><strong>Support Level:</strong> <span id="supportLevel"></span></p>
+            <p><strong>RSI:</strong> <span id="rsi"></span></p>
+        </div>
+    </div>
 </body>
 </html>
