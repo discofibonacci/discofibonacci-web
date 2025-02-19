@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const symbol = document.getElementById("symbolInput").value || "AAPL";
 
         try {
-            const response = await fetch(`${API_BASE_URL}/market-data?symbol=${symbol}`);
+            const response = await fetch(`https://discofibonacci-web.onrender.com/market-data?symbol=${symbol}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
