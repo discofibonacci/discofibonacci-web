@@ -15,9 +15,20 @@ def get_order_flow(symbol):
 
 # Support Level Detection
 def get_support_levels(symbol):
-    data = yf.Ticker(symbol).history(period="6mo")
-    support_level = min(data['Low'])
-    return support_level
+    try:
+        data = yf.Ticker(symbol).history(period="6mo")
+        
+        if data.empty or 'Low' not in data.columns:
+            print(f"{symbol}: No price data found, returning default support level")
+            return "No Data Available"
+
+        support_level = min(data['Low'])
+        return round(support_level, 2)
+    
+    except Exception as e:
+        print(f"Failed to get ticker '{symbol}' reason: {str(e)}")
+        return "Error Fetching Data"
+
 
 # RSI Momentum Indicator
 def get_rsi(symbol):
