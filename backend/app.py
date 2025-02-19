@@ -8,11 +8,13 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://discofibonacci.github.io"}})
 
+# ✅ Correct Placement: Health Check Route
+@app.route('/healthz')
+def health_check():
+    return jsonify({"status": "ok"}), 200  # Health check returns a 200 OK
+
 # Alpha Vantage API Key
 ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
-
-def health_check():
-    return jsonify({"status": "ok"}), 200
 
 # Liquidity & Order Flow Tracking
 def get_order_flow(symbol):
