@@ -84,3 +84,7 @@ def get_rsi(symbol):
     except Exception as e:
         print(f"❌ Error fetching RSI for {symbol}: {str(e)}")
         return "Error Fetching Data"
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))  # Ensures correct port binding for Render
+    app.run(host="0.0.0.0", port=port)
