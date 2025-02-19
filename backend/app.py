@@ -8,10 +8,33 @@ def health_check():
     return jsonify({"status": "ok"}), 200  # Health check returns a 200 OK
 
 # Liquidity & Order Flow Tracking
+import os
+
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")  # ✅ Securely fetch your API key
+
 def get_order_flow(symbol):
-    url = f"https://finnhub.io/api/v1/stock/orderbook?symbol={symbol}&token=YOUR_API_KEY"
-    response = requests.get(url).json()
-    return response
+    """Fetches order book data using Alpha Vantage's Time Series API."""
+    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={6SVMZ99RZKHQA378}"
+    
+    try:
+        response = requests.get(url).json()
+        if "Time Series (5min)" in response:
+            latest_timestamp = max(response["Time Series (5min)"].keys())  # Get the most recent data point
+            latest_data = response["Time Series (5min)"][latest_timestamp]
+            
+            order_flow = {
+                "open": latest_data["1. open"],
+                "high": latest_data["2. high"],
+                "low": latest_data["3. low"],
+                "close": latest_data["4. close"],
+                "volume": latest_data["5. volume"]
+            }
+            return order_flow
+        else:
+            return {"error": "No valid order flow data found."}
+    except Exception as e:
+        return {"error": f"Failed to fetch order flow: {str(e)}"}
+
 
 # Support Level Detection
 def get_support_levels(symbol):
