@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 # Initialize Flask App
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://discofibonacci-web.onrender.com"}})
+CORS(app)  # Allow all origins
 
 # API Keys
 ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
@@ -95,12 +95,14 @@ def market_data():
     support_level = get_support_levels(symbol)
     rsi = get_rsi(symbol)
 
-    return jsonify({
+    response = jsonify({
         "symbol": symbol,
         "order_flow": order_flow,
         "support_level": support_level,
         "rsi": rsi
     })
+    response.headers.add("Access-Control-Allow-Origin", "*")  # Ensure CORS headers are sent
+    return response
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  # Ensure correct port binding for Render
