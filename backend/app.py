@@ -10,11 +10,10 @@ def health_check():
 # Liquidity & Order Flow Tracking
 import os
 
-ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")  # ✅ Securely fetch your API key
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 
-def get_order_flow(symbol):
-    """Fetches order book data using Alpha Vantage's Time Series API."""
-    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={"6SVMZ99RZKHQA378"}"
+url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={ALPHA_VANTAGE_API_KEY}"
+
     
     try:
         response = requests.get(url).json()
