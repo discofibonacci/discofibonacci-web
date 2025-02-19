@@ -40,28 +40,41 @@ def get_order_flow(symbol):
 # 🔻 Support Level Detection
 def get_support_levels(symbol):
     try:
-        data = yf.Ticker(symbol).history(period="6mo")
+        data = yf.Ticker(symbol).history(period="3mo")  # 🔹 Use 3 months instead of 6
+
+        print(f"🟡 Debugging Support Levels: Data for {symbol} → {data.tail()}")  # Debugging
+
         if data.empty or 'Low' not in data.columns:
+            print(f"⚠️ No valid price data found for {symbol} (Support Level)")
             return "No Data Available"
-        return round(min(data['Low']), 2)
+
+        return round(min(data['Low']), 2)  # 🔹 Support based on 3-month lowest price
     except Exception as e:
+        print(f"❌ Error fetching support levels for {symbol}: {str(e)}")
         return "Error Fetching Data"
 
 # 📈 RSI Momentum Indicator
 def get_rsi(symbol):
     try:
-        data = yf.Ticker(symbol).history(period="1mo")
+        data = yf.Ticker(symbol).history(period="14d")  # 🔹 Use 14-day window for faster RSI signals
+
+        print(f"🟡 Debugging RSI: Data for {symbol} → {data.tail()}")  # Debugging
+
         if data.empty or 'Close' not in data.columns:
-            return "No Data Available"  # Ensure frontend handles this gracefully
+            print(f"⚠️ No valid closing price data for {symbol} (RSI Calculation)")
+            return "No Data Available"
+
         delta = data['Close'].diff()
-        gain = (delta.where(delta > 0, 0)).rolling(14).mean()
-        loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+        gain = (delta.where(delta > 0, 0)).rolling(7).mean()  # 🔹 Faster 7-day rolling window
+        loss = (-delta.where(delta < 0, 0)).rolling(7).mean()  # 🔹 Adjusted for momentum tracking
         rs = gain / loss
         rsi = 100 - (100 / (1 + rs))
 
-        # Ensure RSI is a valid number
+        print(f"🔹 RSI Calculation for {symbol}: {rsi.dropna().tail()}")  # Debugging
+
         return round(rsi.iloc[-1], 2) if not rsi.isna().iloc[-1] else "No Data Available"
     except Exception as e:
+        print(f"❌ Error fetching RSI for {symbol}: {str(e)}")
         return "Error Fetching Data"
 
 # 🎯 API Endpoint for Market Data
