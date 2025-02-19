@@ -6,16 +6,18 @@ from flask_cors import CORS
 
 # Initialize Flask App
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://discofibonacci.github.io"}})
 
-# Alpha Vantage API Key
+# Correct CORS settings to allow both frontend & backend origins
+CORS(app, resources={r"/*": {"origins": ["https://discofibonacci.github.io", "https://discofibonacci-web.onrender.com"]}})
+
+# Alpha Vantage API Key from Render environment variables
 ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 
 @app.route('/healthz')
 def health_check():
-    return jsonify({"status": "ok"}), 200  # Health check returns 200 OK
+    return jsonify({"status": "ok"}), 200  # Health check route
 
-# Liquidity & Order Flow Tracking
+# 📊 Liquidity & Order Flow Tracking
 def get_order_flow(symbol):
     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={ALPHA_VANTAGE_API_KEY}"
     try:
@@ -35,31 +37,22 @@ def get_order_flow(symbol):
     except Exception as e:
         return {"error": f"Failed to fetch order flow: {str(e)}"}
 
-# Support Level Detection
+# 🔻 Support Level Detection
 def get_support_levels(symbol):
     try:
         data = yf.Ticker(symbol).history(period="6mo")
-
         if data.empty or 'Low' not in data.columns:
-            print(f"⚠️ {symbol}: No 'Low' price data found for support level calculation!")
             return "No Data Available"
-
-        support_level = min(data['Low'].dropna())  # Remove NaNs
-        return round(support_level, 2)
-    
+        return round(min(data['Low']), 2)
     except Exception as e:
-        print(f"❌ Error fetching support levels for {symbol}: {str(e)}")
         return "Error Fetching Data"
 
-# RSI Momentum Indicator
+# 📈 RSI Momentum Indicator
 def get_rsi(symbol):
     try:
         data = yf.Ticker(symbol).history(period="1mo")
-
         if data.empty or 'Close' not in data.columns:
-            print(f"⚠️ {symbol}: No 'Close' price data found for RSI calculation!")
-            return "No Data Available"
-
+            return "No Data Available"  # Ensure frontend handles this gracefully
         delta = data['Close'].diff()
         gain = (delta.where(delta > 0, 0)).rolling(14).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
@@ -67,22 +60,18 @@ def get_rsi(symbol):
         rsi = 100 - (100 / (1 + rs))
 
         # Ensure RSI is a valid number
-        if rsi.isna().iloc[-1]:
-            print(f"⚠️ {symbol}: RSI calculation resulted in NaN!")
-            return "No Data Available"
-
-        return round(rsi.iloc[-1], 2)
-
+        return round(rsi.iloc[-1], 2) if not rsi.isna().iloc[-1] else "No Data Available"
     except Exception as e:
-        print(f"❌ Error fetching RSI for {symbol}: {str(e)}")
         return "Error Fetching Data"
 
+# 🎯 API Endpoint for Market Data
 @app.route("/market-data", methods=["GET"])
 def market_data():
     symbol = request.args.get("symbol", "AAPL")
     order_flow = get_order_flow(symbol)
     support_level = get_support_levels(symbol)
     rsi = get_rsi(symbol)
+
     return jsonify({
         "symbol": symbol,
         "order_flow": order_flow,
@@ -90,6 +79,7 @@ def market_data():
         "rsi": rsi
     })
 
+# 🚀 Ensuring Proper Port Binding for Render Deployment
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))  # Ensure correct port binding for Render
+    port = int(os.environ.get("PORT", 10000))  # Bind correct port for Render
     app.run(host="0.0.0.0", port=port)
