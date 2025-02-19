@@ -45,30 +45,41 @@ def get_order_flow(symbol):
 # Optimized Support Level Detection (3-month period)
 def get_support_levels(symbol):
     try:
-        data = yf.Ticker(symbol).history(period="3mo")
-        if data.empty or 'Low' not in data.columns:
+        ticker = yf.Ticker(symbol)
+        data = ticker.history(period="6mo")
+
+        if data.empty:
+            print(f"⚠️ {symbol}: No price data found for support levels (6mo).")
             return "No Data Available"
+
         return round(min(data['Low']), 2)
+
     except Exception as e:
+        print(f"❌ Yahoo Finance Error for {symbol}: {str(e)}")
         return "Error Fetching Data"
 
-# Optimized RSI Calculation (14-day period)
 def get_rsi(symbol):
     try:
-        data = yf.Ticker(symbol).history(period="14d")
-        if data.empty or 'Close' not in data.columns:
+        ticker = yf.Ticker(symbol)
+        data = ticker.history(period="3mo")  # ✅ Adjusted timeframe
+
+        if data.empty:
+            print(f"⚠️ {symbol}: No price data found for RSI (3mo).")
             return "No Data Available"
+
         delta = data['Close'].diff()
         gain = (delta.where(delta > 0, 0)).rolling(14).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
         rs = gain / loss
         rsi = 100 - (100 / (1 + rs))
 
-        # Ensure RSI is not NaN
         if rsi.isna().iloc[-1]:
-            return "No Data Available"
+            return "Error"
+
         return round(rsi.iloc[-1], 2)
+
     except Exception as e:
+        print(f"❌ Yahoo Finance Error for {symbol}: {str(e)}")
         return "Error Fetching Data"
 
 @app.route("/market-data", methods=["GET"])
