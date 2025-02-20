@@ -10,6 +10,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let lastClose = null; // Store last close price for color change
 
+    function updatePriceChart(data) {
+        console.log("Updating Price Chart with:", data);
+
+        if (!data.order_flow) {
+            console.error("No valid price data available for the chart.");
+            return;
+        }
+
+        console.log("Closing Price:", data.order_flow.close);
+        // TODO: Implement actual charting logic (e.g., using Chart.js)
+    }
+
     async function fetchMarketData(symbol) {
         try {
             console.log(`Fetching Market Data for: ${symbol}`);
@@ -39,12 +51,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 <b>Volume:</b> ${data.order_flow.volume.toLocaleString()}
             `;
 
-            vwapElement.innerHTML = `<b>VWAP:</b> ${data.order_flow.vwap ? data.order_flow.vwap.toFixed(2) : "N/A"}`;
+            vwapElement.innerHTML = `<b>VWAP:</b> ${data.order_flow.vwap.toFixed(2)}`;
             rsiElement.innerHTML = `<b>RSI:</b> ${data.rsi ? data.rsi.toFixed(2) : "Unavailable"}`;
 
-            supportElement.innerHTML = `<b>Support Levels:</b><br> ${Array.isArray(data.support_level) ? data.support_level.map(s => `S: ${s}`).join("<br>") : "N/A"}`;
-            resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> ${Array.isArray(data.resistance_level) ? data.resistance_level.map(r => `R: ${r}`).join("<br>") : "N/A"}`;
+            supportElement.innerHTML = `<b>Support Levels:</b><br> ${data.support_level.map(s => `S: ${s}`).join("<br>")}`;
+            resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> ${data.resistance_level.map(r => `R: ${r}`).join("<br>")}`;
 
+            updatePriceChart(data);
         } catch (error) {
             console.error("Error fetching market data:", error);
             orderFlowElement.innerHTML = "<b>Error fetching order flow.</b>";
@@ -71,27 +84,27 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateOrderBookTable(data) {
         if (!orderBookTable) return;
         orderBookTable.innerHTML = ""; // Clears old data before inserting new
-
+    
         data.forEach(order => {
             const row = document.createElement("tr");
-
+    
             const priceCell = document.createElement("td");
             priceCell.textContent = order.price.toFixed(2);
             priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050";
-
+    
             const sizeCell = document.createElement("td");
             sizeCell.textContent = order.size.toLocaleString();
-
+    
             const liquidityCell = document.createElement("td");
             liquidityCell.textContent = order.liquidity.toFixed(2);
-
+    
             row.appendChild(priceCell);
             row.appendChild(sizeCell);
             row.appendChild(liquidityCell);
-
+    
             orderBookTable.appendChild(row);
         });
-    }
+    }    
 
     function triggerDataFetch() {
         const symbol = symbolInput.value.trim().toUpperCase();

@@ -105,3 +105,16 @@ tr:hover {
     background: rgba(0, 255, 255, 0.2);
     transition: 0.3s;
 }
+
+/* Chart Styling */
+.chart-container {
+    margin-top: 20px;
+    background: rgba(25, 25, 25, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #00eaff;
+    box-shadow: 0 0 15px #00eaff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

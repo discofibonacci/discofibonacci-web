@@ -1,7 +1,6 @@
 import os
 import yfinance as yf
 import numpy as np
-import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -20,24 +19,8 @@ def get_market_data():
         hist = ticker.history(period="1d", interval="5m")
         if hist.empty:
             return jsonify({"error": f"No price data found for {symbol}."}), 404
-        
         latest = hist.iloc[-1]
 
-        # VWAP Calculation
-        hist['VWAP'] = (hist['High'] + hist['Low'] + hist['Close']) / 3
-        vwap = hist['VWAP'].iloc[-1]
-
-        # RSI Calculation
-        if len(hist['Close']) > 14:
-            delta = hist['Close'].diff()
-            gain = (delta.where(delta > 0, 0)).rolling(14).mean()
-            loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-            rs = gain / loss
-            rsi = 100 - (100 / (1 + rs))
-        else:
-            rsi = None
-
-        # Support & Resistance
         pivot = (latest["High"] + latest["Low"] + latest["Close"]) / 3
         resistance_1 = (2 * pivot) - latest["Low"]
         support_1 = (2 * pivot) - latest["High"]
@@ -51,9 +34,9 @@ def get_market_data():
                 "low": round(latest['Low'], 2),
                 "open": round(latest['Open'], 2),
                 "volume": int(latest['Volume']),
-                "vwap": round(vwap, 2)
+                "vwap": round((latest['High'] + latest['Low'] + latest['Close']) / 3, 2)
             },
-            "rsi": None if rsi is None else round(rsi.iloc[-1], 2),
+            "rsi": None,
             "support_level": [round(support_1, 2), round(support_2, 2)],
             "resistance_level": [round(resistance_1, 2), round(resistance_2, 2)]
         })
@@ -64,18 +47,13 @@ def get_market_data():
 def get_market_depth():
     symbol = request.args.get('symbol', 'AAPL').upper()
     try:
-        ticker = yf.Ticker(symbol)
-        order_book = ticker.history(period="1d", interval="5m").tail(5)
-        
-        if order_book.empty:
-            return jsonify({"error": f"No depth data for {symbol}"}), 404
-
-        depth_data = []
-        for _, row in order_book.iterrows():
-            depth_data.append({"price": round(row['Close'], 2), "size": int(row['Volume']), "type": "bid", "liquidity": round(np.random.random(), 2), "symbol": symbol})
-            depth_data.append({"price": round(row['Close'] * 1.01, 2), "size": int(row['Volume'] * 0.9), "type": "ask", "liquidity": round(np.random.random(), 2), "symbol": symbol})
-
-        return jsonify(depth_data)
+        order_book = [
+            {"price": round(np.random.uniform(0.99, 1.01) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2)},
+            {"price": round(np.random.uniform(1.01, 1.02) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2)},
+            {"price": round(np.random.uniform(0.98, 1.00) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2)},
+            {"price": round(np.random.uniform(1.02, 1.03) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2)},
+        ]
+        return jsonify(order_book)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
