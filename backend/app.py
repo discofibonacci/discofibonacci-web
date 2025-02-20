@@ -1,8 +1,8 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
 import os
 import yfinance as yf
 import numpy as np
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
 
@@ -12,19 +12,15 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 @app.route('/market-data', methods=['GET'])
 def get_market_data():
     symbol = request.args.get('symbol', 'AAPL').upper()  # Ensure symbol is uppercase
-    
+
     try:
-    ticker = yf.Ticker(symbol)  # Ensure this line is present!
-    hist = ticker.history(period="1d", interval="5m")
+        ticker = yf.Ticker(symbol)  # Ensure this line is properly indented!
+        hist = ticker.history(period="1d", interval="5m")
 
-    # Debugging: Check if Yahoo Finance returned empty data
-    if hist.empty:
-        print(f"Yahoo Finance returned empty data for {symbol}. Full response: {ticker.history_metadata}")
-        return jsonify({"error": f"No price data found for {symbol}. Response: {ticker.history_metadata}"}), 404
-
-except Exception as e:
-    print(f"Error fetching data for {symbol}: {str(e)}")
-    return jsonify({"error": f"Failed to get ticker '{symbol}' reason: {str(e)}"}), 500
+        # Debugging: Check if Yahoo Finance returned empty data
+        if hist.empty:
+            print(f"Yahoo Finance returned empty data for {symbol}. Full response: {ticker.history_metadata}")
+            return jsonify({"error": f"No price data found for {symbol}. Response: {ticker.history_metadata}"}), 404
 
         latest = hist.iloc[-1]  # Get latest price data
 
@@ -35,33 +31,25 @@ except Exception as e:
             loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
             rs = gain / loss
             rsi = 100 - (100 / (1 + rs))
-            rsi_value = round(rsi.iloc[-1], 2)
         else:
-            rsi_value = "Not enough data for RSI"
+            rsi = None
 
-        data = {
-            "symbol": symbol,
+        return jsonify({
             "order_flow": {
-                "open": round(latest['Open'], 4),
-                "high": round(latest['High'], 4),
-                "low": round(latest['Low'], 4),
-                "close": round(latest['Close'], 4),
-                "volume": int(latest['Volume'])
+                "close": latest['Close'],
+                "high": latest['High'],
+                "low": latest['Low'],
+                "open": latest['Open'],
+                "volume": latest['Volume']
             },
-            "support_level": "No Data Available",  # Placeholder for future support levels
-            "rsi": rsi_value
-        }
-
-        return jsonify(data)
+            "support_level": "No Data Available",
+            "rsi": None if rsi is None else rsi.iloc[-1]
+        })
 
     except Exception as e:
-        return jsonify({"error": f"Failed to fetch data for {symbol}. Reason: {str(e)}"}), 500
-
-
-@app.route('/healthz', methods=['GET'])
-def health_check():
-    return jsonify({"status": "ok"}), 200
+        print(f"Error fetching data for {symbol}: {str(e)}")
+        return jsonify({"error": f"Failed to get ticker '{symbol}' reason: {str(e)}"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
