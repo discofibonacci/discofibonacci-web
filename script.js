@@ -8,11 +8,72 @@ document.addEventListener("DOMContentLoaded", function () {
     const vwapElement = document.getElementById("vwap");
     const orderBookTable = document.querySelector("#orderBookTable tbody");
     const priceChartCanvas = document.getElementById("priceChart");
-    Chart.register(Chart.FinancialController, Chart.FinancialElement);
+    
 
     let lastClose = null;
     let priceChart = null;
+    Chart.register(Chart.FinancialController, Chart.FinancialElement);
 
+    function updatePriceChart(data) {
+        console.log("Updating Price Chart with:", data);
+    
+        if (!data.candlesticks || data.candlesticks.length === 0) {
+            console.error("No valid candlestick data available for the chart.");
+            return;
+        }
+    
+        const priceChartCanvas = document.getElementById("priceChart");
+        const ctx = priceChartCanvas.getContext("2d");
+    
+        // Convert API data into candlestick format
+        const candlestickData = data.candlesticks.map(entry => ({
+            t: new Date(entry.time), // Timestamp
+            o: entry.open,
+            h: entry.high,
+            l: entry.low,
+            c: entry.close
+        }));
+    
+        // Chart configuration
+        const config = {
+            type: "candlestick",
+            data: {
+                datasets: [{
+                    label: "Price Movement",
+                    data: candlestickData,
+                    borderColor: "rgba(0, 255, 255, 0.8)",
+                    backgroundColor: "rgba(0, 255, 255, 0.2)"
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: "time",
+                        time: {
+                            unit: "minute"
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    
+        // Destroy previous chart instance if it exists
+        if (window.priceChart) {
+            window.priceChart.destroy();
+        }
+    
+        window.priceChart = new Chart(ctx, config);
+    }
+    
     function updatePriceChart(data) {
         console.log("Updating Price Chart with:", data);
 
