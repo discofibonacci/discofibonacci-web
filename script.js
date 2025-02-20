@@ -40,13 +40,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
             rsiElement.innerHTML = `<b>RSI:</b> ${data.rsi ? data.rsi.toFixed(2) : "Unavailable"}`;
 
-            supportElement.innerHTML = `<b>Support Levels:</b><br> S: ${data.support_level ? data.support_level.replace(/,/g, "<br> S: ") : "N/A"}`;
-            resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> R: ${data.resistance_level ? data.resistance_level.replace(/,/g, "<br> R: ") : "N/A"}`;
+            // Ensure support and resistance levels are displayed correctly
+            supportElement.innerHTML = `<b>Support Levels:</b><br> ${
+                Array.isArray(data.support_level) 
+                    ? data.support_level.map(s => `S: ${s}`).join("<br>")
+                    : data.support_level.split(',').map(s => `S: ${s.trim()}`).join("<br>")
+            }`;
+
+            resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> ${
+                Array.isArray(data.resistance_level) 
+                    ? data.resistance_level.map(r => `R: ${r}`).join("<br>")
+                    : data.resistance_level.split(',').map(r => `R: ${r.trim()}`).join("<br>")
+            }`;
 
         } catch (error) {
             console.error("Error fetching market data:", error);
             orderFlowElement.innerHTML = "<b>Error fetching order flow.</b>";
             rsiElement.innerHTML = "<b>Error fetching RSI.</b>";
+            supportElement.innerHTML = "<b>Support Levels:</b> Loading...";
+            resistanceElement.innerHTML = "<b>Resistance Levels:</b> Loading...";
         }
     }
 
@@ -59,35 +71,34 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             const data = await response.json();
             console.log("Market Depth Data:", data);
-            updateOrderBookTable(data, symbol);
+            updateOrderBookTable(data);
         } catch (error) {
             console.error("Error fetching market depth:", error);
             orderBookTable.innerHTML = "<tr><td colspan='3'>Error fetching data.</td></tr>";
         }
     }
 
-    function updateOrderBookTable(data, symbol) {
+    function updateOrderBookTable(data) {
         if (!orderBookTable) return;
         orderBookTable.innerHTML = ""; // Clears old data before inserting new
-    
-        // Ensure we only show data that matches the selected symbol
-        data.filter(order => order.symbol === symbol).forEach(order => {
+
+        data.forEach(order => {  
             const row = document.createElement("tr");
-    
+
             const priceCell = document.createElement("td");
             priceCell.textContent = order.price.toFixed(2);
             priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050";
-    
+
             const sizeCell = document.createElement("td");
             sizeCell.textContent = order.size.toLocaleString();
-    
+
             const liquidityCell = document.createElement("td");
             liquidityCell.textContent = order.liquidity.toFixed(2);
-    
+
             row.appendChild(priceCell);
             row.appendChild(sizeCell);
             row.appendChild(liquidityCell);
-    
+
             orderBookTable.appendChild(row);
         });
     }    
