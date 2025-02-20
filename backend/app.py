@@ -14,16 +14,16 @@ def get_market_data():
     symbol = request.args.get('symbol', 'AAPL').upper()  # Ensure symbol is uppercase
     
     try:
-        ticker = yf.Ticker(symbol)
-        hist = ticker.history(period="1d", interval="5m")
+    ticker = yf.Ticker(symbol)  # Ensure this line is present!
+    hist = ticker.history(period="1d", interval="5m")
 
-# Debugging: Check if Yahoo Finance returned empty data
-if hist.empty:
-    print(f"Yahoo Finance returned empty data for {symbol}. Full response: {ticker.history_metadata}")
-    return jsonify({"error": f"No price data found for {symbol}. Response: {ticker.history_metadata}"}), 404
-
-        if hist.empty:
-            return jsonify({"error": f"No price data found for {symbol}"}), 404
+    # Debugging: Check if Yahoo Finance returned empty data
+    if hist.empty:
+        print(f"Yahoo Finance returned empty data for {symbol}. Full response: {ticker.history_metadata}")
+        return jsonify({"error": f"No price data found for {symbol}. Response: {ticker.history_metadata}"}), 404
+except Exception as e:
+    print(f"Error fetching data for {symbol}: {str(e)}")
+    return jsonify({"error": f"Failed to get ticker '{symbol}' reason: {str(e)}"}), 500
 
         latest = hist.iloc[-1]  # Get latest price data
 
