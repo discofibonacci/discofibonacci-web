@@ -1,102 +1,85 @@
 document.addEventListener("DOMContentLoaded", function () {
     const symbolInput = document.getElementById("symbolInput");
-    const fetchDataBtn = document.getElementById("fetchData");
-    const orderFlowElement = document.getElementById("orderFlow");
-    const rsiElement = document.getElementById("rsi");
-    const orderBookTable = document.querySelector("#orderBookTable tbody");
+    const fetchButton = document.getElementById("fetchData");
 
-    let lastClose = null; // Store last close price for color change
-
-    async function fetchMarketData(symbol) {
-        try {
-            const response = await fetch(`http://127.0.0.1:10000/market-data?symbol=${symbol}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const data = await response.json();
-
-            // Handle potential missing data
-            if (!data.order_flow) {
-                orderFlowElement.innerHTML = "<b>No valid order flow data found.</b>";
-                return;
-            }
-
-            let closeColor = "white";
-            if (lastClose !== null) {
-                closeColor = data.order_flow.close > lastClose ? "#00ff00" : "#ff5050";
-            }
-            lastClose = data.order_flow.close;
-
-            orderFlowElement.innerHTML = `
-                <b>Open:</b> ${data.order_flow.open.toFixed(2)}<br>
-                <b>High:</b> ${data.order_flow.high.toFixed(2)}<br>
-                <b>Low:</b> ${data.order_flow.low.toFixed(2)}<br>
-                <b>Close:</b> <span style="color:${closeColor}">${data.order_flow.close.toFixed(2)}</span><br>
-                <b>Volume:</b> ${data.order_flow.volume.toLocaleString()}
-            `;
-
-            rsiElement.innerHTML = `<b>RSI:</b> ${data.rsi ? data.rsi.toFixed(2) : "Unavailable"}`;
-
-        } catch (error) {
-            console.error("Error fetching market data:", error);
-            orderFlowElement.innerHTML = "<b>Error fetching order flow.</b>";
-            rsiElement.innerHTML = "<b>Error fetching RSI.</b>";
-        }
-    }
-
-    async function fetchMarketDepth(symbol) {
-        try {
-            const response = await fetch(`http://127.0.0.1:10000/market-depth?symbol=${symbol}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const data = await response.json();
-            updateOrderBookTable(data);
-        } catch (error) {
-            console.error("Error fetching market depth:", error);
-            orderBookTable.innerHTML = "<tr><td colspan='3'>Error fetching data.</td></tr>";
-        }
-    }
-
-    function updateOrderBookTable(data) {
-        if (!orderBookTable) return;
-        orderBookTable.innerHTML = "";
-
-        data.forEach(order => {
-            const row = document.createElement("tr");
-
-            const priceCell = document.createElement("td");
-            priceCell.textContent = order.price.toFixed(2);
-            priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050";
-
-            const sizeCell = document.createElement("td");
-            sizeCell.textContent = order.size.toLocaleString();
-
-            const liquidityCell = document.createElement("td");
-            liquidityCell.textContent = order.liquidity.toFixed(2);
-
-            row.appendChild(priceCell);
-            row.appendChild(sizeCell);
-            row.appendChild(liquidityCell);
-
-            orderBookTable.appendChild(row);
-        });
-    }
-
-    function triggerDataFetch() {
-        const symbol = symbolInput.value.trim().toUpperCase() || "AAPL";
-        fetchMarketData(symbol);
-        fetchMarketDepth(symbol);
-    }
-
-    fetchDataBtn.addEventListener("click", triggerDataFetch);
-
+    // Allow "Enter" key to trigger data fetch
     symbolInput.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
-            triggerDataFetch();
+            fetchMarketData(symbolInput.value.trim().toUpperCase());
+            fetchMarketDepth(symbolInput.value.trim().toUpperCase());
         }
     });
 
-    // Auto-load default symbol on page load
-    triggerDataFetch();
+    // Button click fetch
+    fetchButton.addEventListener("click", function () {
+        fetchMarketData(symbolInput.value.trim().toUpperCase());
+        fetchMarketDepth(symbolInput.value.trim().toUpperCase());
+    });
 });
+
+// Fetch Market Data (Price, RSI, Support/Resistance)
+async function fetchMarketData(symbol) {
+    try {
+        const response = await fetch(`http://127.0.0.1:10000/market-data?symbol=${symbol}`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+        console.log("✅ Market Data Fetched:", data); // Debugging Log
+
+        document.getElementById("marketData").innerHTML = `
+            <strong>Open:</strong> ${data.order_flow.open.toFixed(2)}  
+            <strong>High:</strong> ${data.order_flow.high.toFixed(2)}  
+            <strong>Low:</strong> ${data.order_flow.low.toFixed(2)}  
+            <strong>Close:</strong> <span style="color: ${data.order_flow.close >= data.order_flow.open ? "limegreen" : "red"}">${data.order_flow.close.toFixed(2)}</span>  
+            <strong>Volume:</strong> ${data.order_flow.volume.toLocaleString()}
+            <br><br>
+            <strong>RSI:</strong> ${data.rsi.toFixed(2)}
+        `;
+
+    } catch (error) {
+        console.error("❌ Error fetching market data:", error);
+        document.getElementById("marketData").innerHTML = "<span style='color: red;'>Failed to load market data.</span>";
+    }
+}
+
+// Fetch Market Depth (Bid/Ask Order Book)
+async function fetchMarketDepth(symbol) {
+    try {
+        const response = await fetch(`http://127.0.0.1:10000/market-depth?symbol=${symbol}`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+        console.log("📊 Market Depth Data:", data); // Debugging Log
+
+        updateOrderBookTable(data);
+
+    } catch (error) {
+        console.error("❌ Error fetching market depth:", error);
+    }
+}
+
+// Update Market Depth Table (Fix Incorrect Data Display)
+function updateOrderBookTable(data) {
+    const tableBody = document.querySelector("#orderBookTable tbody");
+    tableBody.innerHTML = ""; // Clear previous data
+
+    if (!data || data.length === 0) {
+        console.warn("⚠ No market depth data available.");
+        tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: red;">No Data</td></tr>`;
+        return;
+    }
+
+    data.forEach((entry) => {
+        const row = document.createElement("tr");
+
+        // Determine color: Green for bids, Red for asks
+        let priceColor = entry.type === "bid" ? "limegreen" : "red";
+
+        row.innerHTML = `
+            <td style="color:${priceColor}; font-weight:bold">${entry.price.toFixed(2)}</td>
+            <td>${entry.size}</td>
+            <td>${entry.liquidity.toFixed(2)}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
