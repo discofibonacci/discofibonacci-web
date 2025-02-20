@@ -55,5 +55,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (event.key === "Enter") {
             event.preventDefault();
             fetchData();
-       
         }
+    });
+});
