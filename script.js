@@ -105,20 +105,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function triggerDataFetch() {
         const symbol = symbolInput.value.trim().toUpperCase();
+    
+        console.log(`Triggering Data Fetch - Symbol Entered: '${symbol}'`); // Debugging Step 1
+    
         if (!symbol) {
             console.log("No symbol entered. Data fetch skipped.");
             return;
         }
-        console.log(`Fetching Data for Symbol: ${symbol}`);
+    
+        console.log(`Fetching Data for Symbol: ${symbol}`); // Debugging Step 2
+    
         fetchMarketData(symbol);
         fetchMarketDepth(symbol);
     }
+    
 
-    fetchDataBtn.addEventListener("click", triggerDataFetch);
+    fetchDataBtn.addEventListener("click", function () {
+        console.log("Fetch Data Button Clicked!"); // Debugging Step 3
+        triggerDataFetch();
+    });
+    
     symbolInput.addEventListener("keypress", function (event) {
+        console.log(`Key Pressed: ${event.key}`); // Debugging Step 4
         if (event.key === "Enter") {
+            console.log("Enter Key Pressed! Fetching Data...");
             triggerDataFetch();
         }
-    });
+    });    
 
 });
