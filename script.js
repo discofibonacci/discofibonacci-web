@@ -14,9 +14,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Register Candlestick Chart Type
     Chart.register(
-        window['chartjs-chart-financial'].CandlestickController,
-        window['chartjs-chart-financial'].CandlestickElement
+        CandlestickController,
+        CandlestickElement,
+        OhlcController,
+        OhlcElement
     );
+    
 
     function updatePriceChart(data) {
         console.log("Updating Price Chart with:", data);
