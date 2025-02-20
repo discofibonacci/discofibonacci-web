@@ -12,14 +12,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let lastClose = null;
     let priceChart = null;
 
-    // Register Candlestick Chart Type
-    Chart.register(
-        CandlestickController,
-        CandlestickElement,
-        OhlcController,
-        OhlcElement
-    );
-    
+    // Ensure the financial chart plugin is correctly loaded
+    const { CandlestickController, CandlestickElement, OhlcController, OhlcElement } = window['chartjs-chart-financial'];
+
+    // Register Financial Chart Types
+    Chart.register(CandlestickController, CandlestickElement, OhlcController, OhlcElement);
+    console.log("✅ Candlestick and OHLC charts registered!");
 
     function updatePriceChart(data) {
         console.log("Updating Price Chart with:", data);
