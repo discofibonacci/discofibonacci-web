@@ -1,6 +1,7 @@
 import os
 import yfinance as yf
 import numpy as np
+import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -13,19 +14,20 @@ def health_check():
 
 @app.route('/market-data', methods=['GET'])
 def get_market_data():
-    symbol = request.args.get('symbol', '').upper()
-    if not symbol:
-        return jsonify({"error": "Symbol parameter is required."}), 400
-
+    symbol = request.args.get('symbol', 'AAPL').upper()
     try:
         ticker = yf.Ticker(symbol)
         hist = ticker.history(period="1d", interval="5m")
-        
         if hist.empty:
             return jsonify({"error": f"No price data found for {symbol}."}), 404
         
         latest = hist.iloc[-1]
-        
+
+        # VWAP Calculation
+        hist['VWAP'] = (hist['High'] + hist['Low'] + hist['Close']) / 3
+        vwap = hist['VWAP'].iloc[-1]
+
+        # RSI Calculation
         if len(hist['Close']) > 14:
             delta = hist['Close'].diff()
             gain = (delta.where(delta > 0, 0)).rolling(14).mean()
@@ -34,7 +36,8 @@ def get_market_data():
             rsi = 100 - (100 / (1 + rs))
         else:
             rsi = None
-        
+
+        # Support & Resistance
         pivot = (latest["High"] + latest["Low"] + latest["Close"]) / 3
         resistance_1 = (2 * pivot) - latest["Low"]
         support_1 = (2 * pivot) - latest["High"]
@@ -42,47 +45,37 @@ def get_market_data():
         support_2 = pivot - (latest["High"] - latest["Low"])
 
         return jsonify({
-            "symbol": symbol,
             "order_flow": {
                 "close": round(latest['Close'], 2),
                 "high": round(latest['High'], 2),
                 "low": round(latest['Low'], 2),
                 "open": round(latest['Open'], 2),
-                "volume": int(latest['Volume'])
+                "volume": int(latest['Volume']),
+                "vwap": round(vwap, 2)
             },
             "rsi": None if rsi is None else round(rsi.iloc[-1], 2),
             "support_level": [round(support_1, 2), round(support_2, 2)],
             "resistance_level": [round(resistance_1, 2), round(resistance_2, 2)]
         })
-
     except Exception as e:
         return jsonify({"error": f"Failed to get ticker '{symbol}' reason: {str(e)}"}), 500
 
 @app.route('/market-depth', methods=['GET'])
 def get_market_depth():
     symbol = request.args.get('symbol', 'AAPL').upper()
-
     try:
         ticker = yf.Ticker(symbol)
-        order_book_data = ticker.history(period="1d", interval="1m")
+        order_book = ticker.history(period="1d", interval="5m").tail(5)
+        
+        if order_book.empty:
+            return jsonify({"error": f"No depth data for {symbol}"}), 404
 
-        if order_book_data.empty:
-            return jsonify({"error": f"No order book data found for {symbol}."}), 404
+        depth_data = []
+        for _, row in order_book.iterrows():
+            depth_data.append({"price": round(row['Close'], 2), "size": int(row['Volume']), "type": "bid", "liquidity": round(np.random.random(), 2), "symbol": symbol})
+            depth_data.append({"price": round(row['Close'] * 1.01, 2), "size": int(row['Volume'] * 0.9), "type": "ask", "liquidity": round(np.random.random(), 2), "symbol": symbol})
 
-        # Get the most recent closing price
-        latest_price = round(order_book_data["Close"].iloc[-1], 2)
-
-        # Approximate bid/ask using a small spread
-        bid_price = round(latest_price * 0.999, 2)  # Slightly lower for bid
-        ask_price = round(latest_price * 1.001, 2)  # Slightly higher for ask
-
-        order_book = [
-            {"symbol": symbol, "price": bid_price, "size": np.random.randint(200, 500), "type": "bid", "liquidity": round(np.random.uniform(0.1, 1.0), 2)},
-            {"symbol": symbol, "price": ask_price, "size": np.random.randint(200, 500), "type": "ask", "liquidity": round(np.random.uniform(0.1, 1.0), 2)}
-        ]
-
-        return jsonify(order_book)
-
+        return jsonify(depth_data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const rsiElement = document.getElementById("rsi");
     const supportElement = document.getElementById("supportLevels");
     const resistanceElement = document.getElementById("resistanceLevels");
+    const vwapElement = document.getElementById("vwap");
     const orderBookTable = document.querySelector("#orderBookTable tbody");
 
     let lastClose = null; // Store last close price for color change
@@ -38,27 +39,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 <b>Volume:</b> ${data.order_flow.volume.toLocaleString()}
             `;
 
+            vwapElement.innerHTML = `<b>VWAP:</b> ${data.order_flow.vwap ? data.order_flow.vwap.toFixed(2) : "N/A"}`;
             rsiElement.innerHTML = `<b>RSI:</b> ${data.rsi ? data.rsi.toFixed(2) : "Unavailable"}`;
 
-            // Ensure support and resistance levels are displayed correctly
-            supportElement.innerHTML = `<b>Support Levels:</b><br> ${
-                Array.isArray(data.support_level) 
-                    ? data.support_level.map(s => `S: ${s}`).join("<br>")
-                    : data.support_level.split(',').map(s => `S: ${s.trim()}`).join("<br>")
-            }`;
-
-            resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> ${
-                Array.isArray(data.resistance_level) 
-                    ? data.resistance_level.map(r => `R: ${r}`).join("<br>")
-                    : data.resistance_level.split(',').map(r => `R: ${r.trim()}`).join("<br>")
-            }`;
+            supportElement.innerHTML = `<b>Support Levels:</b><br> ${Array.isArray(data.support_level) ? data.support_level.map(s => `S: ${s}`).join("<br>") : "N/A"}`;
+            resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> ${Array.isArray(data.resistance_level) ? data.resistance_level.map(r => `R: ${r}`).join("<br>") : "N/A"}`;
 
         } catch (error) {
             console.error("Error fetching market data:", error);
             orderFlowElement.innerHTML = "<b>Error fetching order flow.</b>";
             rsiElement.innerHTML = "<b>Error fetching RSI.</b>";
-            supportElement.innerHTML = "<b>Support Levels:</b> Loading...";
-            resistanceElement.innerHTML = "<b>Resistance Levels:</b> Loading...";
         }
     }
 
@@ -82,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!orderBookTable) return;
         orderBookTable.innerHTML = ""; // Clears old data before inserting new
 
-        data.forEach(order => {  
+        data.forEach(order => {
             const row = document.createElement("tr");
 
             const priceCell = document.createElement("td");
@@ -101,36 +91,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
             orderBookTable.appendChild(row);
         });
-    }    
+    }
 
     function triggerDataFetch() {
         const symbol = symbolInput.value.trim().toUpperCase();
-    
-        console.log(`Triggering Data Fetch - Symbol Entered: '${symbol}'`); // Debugging Step 1
-    
         if (!symbol) {
             console.log("No symbol entered. Data fetch skipped.");
             return;
         }
-    
-        console.log(`Fetching Data for Symbol: ${symbol}`); // Debugging Step 2
-    
+        console.log(`Fetching Data for Symbol: ${symbol}`);
         fetchMarketData(symbol);
         fetchMarketDepth(symbol);
     }
-    
 
-    fetchDataBtn.addEventListener("click", function () {
-        console.log("Fetch Data Button Clicked!"); // Debugging Step 3
-        triggerDataFetch();
-    });
-    
+    fetchDataBtn.addEventListener("click", triggerDataFetch);
     symbolInput.addEventListener("keypress", function (event) {
-        console.log(`Key Pressed: ${event.key}`); // Debugging Step 4
         if (event.key === "Enter") {
-            console.log("Enter Key Pressed! Fetching Data...");
             triggerDataFetch();
         }
-    });    
+    });
 
 });
