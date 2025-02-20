@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const rsiElement = document.getElementById("rsi");
     const orderBookTable = document.querySelector("#orderBookTable tbody");
 
+    let lastClose = null; // Store last close price for color change
+
     async function fetchMarketData(symbol) {
         try {
             const response = await fetch(`http://127.0.0.1:10000/market-data?symbol=${symbol}`);
@@ -13,19 +15,32 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             const data = await response.json();
 
-            // Ensure market data elements update correctly
-            orderFlowElement.textContent = data.order_flow
-                ? `Open: ${data.order_flow.open.toFixed(2)}\nHigh: ${data.order_flow.high.toFixed(2)}\nLow: ${data.order_flow.low.toFixed(2)}\nClose: ${data.order_flow.close.toFixed(2)}\nVolume: ${data.order_flow.volume.toLocaleString()}`
-                : "No valid order flow data found.";
+            // Handle potential missing data
+            if (!data.order_flow) {
+                orderFlowElement.innerHTML = "<b>No valid order flow data found.</b>";
+                return;
+            }
 
-            rsiElement.textContent = data.rsi
-                ? `RSI: ${data.rsi.toFixed(2)}`
-                : "RSI data unavailable.";
+            let closeColor = "white";
+            if (lastClose !== null) {
+                closeColor = data.order_flow.close > lastClose ? "#00ff00" : "#ff5050";
+            }
+            lastClose = data.order_flow.close;
+
+            orderFlowElement.innerHTML = `
+                <b>Open:</b> ${data.order_flow.open.toFixed(2)}<br>
+                <b>High:</b> ${data.order_flow.high.toFixed(2)}<br>
+                <b>Low:</b> ${data.order_flow.low.toFixed(2)}<br>
+                <b>Close:</b> <span style="color:${closeColor}">${data.order_flow.close.toFixed(2)}</span><br>
+                <b>Volume:</b> ${data.order_flow.volume.toLocaleString()}
+            `;
+
+            rsiElement.innerHTML = `<b>RSI:</b> ${data.rsi ? data.rsi.toFixed(2) : "Unavailable"}`;
 
         } catch (error) {
             console.error("Error fetching market data:", error);
-            orderFlowElement.textContent = "Error fetching order flow.";
-            rsiElement.textContent = "Error fetching RSI.";
+            orderFlowElement.innerHTML = "<b>Error fetching order flow.</b>";
+            rsiElement.innerHTML = "<b>Error fetching RSI.</b>";
         }
     }
 
@@ -58,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
             sizeCell.textContent = order.size.toLocaleString();
 
             const liquidityCell = document.createElement("td");
-            liquidityCell.textContent = order.liquidity.toFixed(2); // Fix empty liquidity column
+            liquidityCell.textContent = order.liquidity.toFixed(2);
 
             row.appendChild(priceCell);
             row.appendChild(sizeCell);
@@ -68,21 +83,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    fetchDataBtn.addEventListener("click", function () {
+    function triggerDataFetch() {
         const symbol = symbolInput.value.trim().toUpperCase() || "AAPL";
         fetchMarketData(symbol);
         fetchMarketDepth(symbol);
-    });
+    }
+
+    fetchDataBtn.addEventListener("click", triggerDataFetch);
 
     symbolInput.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
-            const symbol = symbolInput.value.trim().toUpperCase() || "AAPL";
-            fetchMarketData(symbol);
-            fetchMarketDepth(symbol);
+            triggerDataFetch();
         }
     });
 
     // Auto-load default symbol on page load
-    fetchMarketData("AAPL");
-    fetchMarketDepth("AAPL");
+    triggerDataFetch();
 });

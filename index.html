@@ -5,26 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DiscoFibonacci 2.0</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
 </head>
 <body>
     <div class="container">
-        <h1 class="neon-text">DiscoFibonacci</h1>
-        <p class="subtext">Only those who groove will survive</p>
-        
-        <div class="dashboard">
+        <h1 class="title">DISCOFIBONACCI</h1>
+        <h3 class="subtitle">Only those who groove will survive</h3>
+
+        <div class="input-container">
             <input type="text" id="symbolInput" placeholder="Enter Stock Symbol">
             <button id="fetchData">Let's Boogie!</button>
         </div>
 
-        <div id="market-data" class="data-box">
-            <h3>Market Data</h3>
-            <p><strong>Order Flow:</strong> <span id="orderFlow"></span></p>
-            <p><strong>RSI:</strong> <span id="rsi"></span></p>
-            <p><strong></strong> <span id="supportLevel"></span></p>
+        <div class="data-box">
+            <h2>Market Data</h2>
+            <p id="orderFlow"><b>Order Flow:</b> Loading...</p>
+            <p id="rsi"><b>RSI:</b> Loading...</p>
         </div>
-        <div class="market-depth-container">
-            <h3>Market Depth</h3>
+
+        <div class="data-box">
+            <h2>Market Depth</h2>
             <table id="orderBookTable">
                 <thead>
                     <tr>
@@ -34,11 +33,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Order book data will populate here -->
+                    <tr><td colspan="3">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
-        
     </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

@@ -1,77 +1,114 @@
+/* DiscoFibonacci 2.0 - Dark Mode & Neon Glow */
 body {
-    background: black;
+    background-color: #0a0a0a;
     color: white;
     font-family: 'Arial', sans-serif;
     text-align: center;
-}
-
-.neon-text {
-    font-size: 3rem;
-    text-transform: uppercase;
-    color: cyan;
-    text-shadow: 0 0 5px cyan, 0 0 10px blue;
-    animation: glow 1.5s infinite alternate;
-}
-
-@keyframes glow {
-    from { text-shadow: 0 0 5px cyan, 0 0 10px blue; }
-    to { text-shadow: 0 0 10px cyan, 0 0 20px blue; }
+    margin: 0;
+    padding: 20px;
 }
 
 .container {
-    padding: 20px;
+    max-width: 800px;
+    margin: auto;
 }
 
-.dashboard input, .dashboard button {
-    font-size: 1.2rem;
-    padding: 10px;
-    margin: 10px;
-    border: none;
-    outline: none;
-    border-radius: 10px;
-}
-
-.dashboard button {
-    background: cyan;
-    color: black;
-    cursor: pointer;
+.title {
+    font-size: 40px;
     font-weight: bold;
+    text-shadow: 0 0 15px cyan, 0 0 30px blue;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.input-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input {
+    padding: 10px;
+    width: 200px;
+    font-size: 16px;
+    border: 2px solid cyan;
+    background: black;
+    color: white;
+    text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+    background: cyan;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 10px cyan;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #00bcd4;
+    box-shadow: 0 0 15px #00bcd4;
 }
 
 .data-box {
-    background: rgba(0, 0, 0, 0.8);
+    background: #151515;
     padding: 20px;
-    border-radius: 10px;
     margin-top: 20px;
-    box-shadow: 0 0 10px cyan;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
 }
 
-.market-depth-container {
-    background-color: rgba(20, 20, 20, 0.9);
-    border-radius: 10px;
-    padding: 15px;
-    margin-top: 20px;
+h2 {
+    font-size: 20px;
+    text-shadow: 0 0 10px cyan;
 }
 
-#orderBookTable {
+table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 10px;
 }
 
-#orderBookTable th, #orderBookTable td {
-    padding: 8px;
-    text-align: center;
+th, td {
+    padding: 10px;
     border-bottom: 1px solid #333;
+    text-align: center;
 }
 
-#orderBookTable th {
-    color: #00ffff;
+th {
+    color: cyan;
+    text-shadow: 0 0 10px cyan;
 }
 
-#orderBookTable tbody tr:nth-child(odd) {
-    background-color: rgba(50, 50, 50, 0.5);
+td {
+    color: white;
 }
 
-#orderBookTable tbody tr:nth-child(even) {
-    background-color: rgba(30, 30, 30, 0.5);
+td:first-child {
+    font-weight: bold;
+}
+
+/* Neon glow for positive and negative price movements */
+td:first-child[data-type="bid"] {
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+}
+
+td:first-child[data-type="ask"] {
+    color: #ff5050;
+    text-shadow: 0 0 10px #ff5050;
+}
+
+/* Add glow effect to the market depth */
+tr:hover {
+    background: rgba(0, 255, 255, 0.1);
 }
