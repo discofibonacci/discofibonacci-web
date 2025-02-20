@@ -125,3 +125,21 @@ tr:hover {
     background-color: rgba(0, 0, 0, 0.2); /* Optional: Gives a subtle background */
     border-radius: 10px; /* Rounds the corners */
 }
+h3 {
+    display: none;
+}
+#priceChart {
+    display: block;
+    margin: 30px auto; /* Adds more space */
+    padding: 20px; /* More padding inside */
+    background-color: rgba(0, 0, 0, 0.3); /* Subtle background */
+    border-radius: 10px; /* Smooth rounded edges */
+    width: 90%; /* Ensures it fits neatly */
+    max-width: 800px; /* Prevents excessive stretching */
+}
+#priceChart {
+    max-width: 100%;
+    height: 300px;
+    padding: 15px;
+    margin-top: 10px;
+}
