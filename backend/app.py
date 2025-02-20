@@ -60,17 +60,15 @@ def get_market_data():
 
 @app.route('/market-depth', methods=['GET'])
 def get_market_depth():
-    symbol = request.args.get('symbol', '').upper()
-    if not symbol:
-        return jsonify({"error": "Symbol parameter is required."}), 400
-    
+    symbol = request.args.get('symbol', 'AAPL').upper()
+
     try:
-        base_price = np.random.uniform(240, 250)  # Simulated base price variation
+        # Simulated Order Book Data (Replace with real API later)
         order_book = [
-            {"symbol": symbol, "price": round(base_price * np.random.uniform(0.99, 1.01), 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2)},
-            {"symbol": symbol, "price": round(base_price * np.random.uniform(1.01, 1.02), 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2)},
-            {"symbol": symbol, "price": round(base_price * np.random.uniform(0.98, 1.00), 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2)},
-            {"symbol": symbol, "price": round(base_price * np.random.uniform(1.02, 1.03), 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2)}
+            {"symbol": symbol, "price": round(np.random.uniform(0.99, 1.01) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2)},
+            {"symbol": symbol, "price": round(np.random.uniform(1.01, 1.02) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2)},
+            {"symbol": symbol, "price": round(np.random.uniform(0.98, 1.00) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2)},
+            {"symbol": symbol, "price": round(np.random.uniform(1.02, 1.03) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2)},
         ]
 
         return jsonify(order_book)

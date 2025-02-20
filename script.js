@@ -69,29 +69,28 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateOrderBookTable(data, symbol) {
         if (!orderBookTable) return;
         orderBookTable.innerHTML = ""; // Clears old data before inserting new
-
-        data.forEach(order => {
-            if (order.symbol && order.symbol !== symbol) return; // Ensure the correct symbol is displayed
-
+    
+        // Ensure we only show data that matches the selected symbol
+        data.filter(order => order.symbol === symbol).forEach(order => {
             const row = document.createElement("tr");
-
+    
             const priceCell = document.createElement("td");
             priceCell.textContent = order.price.toFixed(2);
             priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050";
-
+    
             const sizeCell = document.createElement("td");
             sizeCell.textContent = order.size.toLocaleString();
-
+    
             const liquidityCell = document.createElement("td");
             liquidityCell.textContent = order.liquidity.toFixed(2);
-
+    
             row.appendChild(priceCell);
             row.appendChild(sizeCell);
             row.appendChild(liquidityCell);
-
+    
             orderBookTable.appendChild(row);
         });
-    }
+    }    
 
     function triggerDataFetch() {
         const symbol = symbolInput.value.trim().toUpperCase();
