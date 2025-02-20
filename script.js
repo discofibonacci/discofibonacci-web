@@ -7,8 +7,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const resistanceElement = document.getElementById("resistanceLevels");
     const vwapElement = document.getElementById("vwap");
     const orderBookTable = document.querySelector("#orderBookTable tbody");
+    const priceChartCanvas = document.getElementById("priceChart");
 
-    let lastClose = null; // Store last close price for color change
+    let lastClose = null;
+    let priceChart = null;
 
     function updatePriceChart(data) {
         console.log("Updating Price Chart with:", data);
@@ -19,7 +21,62 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         console.log("Closing Price:", data.order_flow.close);
-        // TODO: Implement actual charting logic (e.g., using Chart.js)
+
+        const priceLevels = [
+            data.order_flow.open,
+            data.order_flow.high,
+            data.order_flow.low,
+            data.order_flow.close
+        ];
+
+        if (!priceChart) {
+            const ctx = priceChartCanvas.getContext("2d");
+            priceChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: ["Open", "High", "Low", "Close"],
+                    datasets: [{
+                        label: "Price Levels",
+                        data: priceLevels,
+                        borderColor: "rgba(0, 255, 255, 0.8)",
+                        backgroundColor: "rgba(0, 255, 255, 0.2)",
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            priceChart.data.datasets[0].data = priceLevels;
+            priceChart.update();
+        }
     }
 
     async function fetchMarketData(symbol) {
@@ -83,28 +140,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateOrderBookTable(data) {
         if (!orderBookTable) return;
-        orderBookTable.innerHTML = ""; // Clears old data before inserting new
-    
+        orderBookTable.innerHTML = "";
+
         data.forEach(order => {
             const row = document.createElement("tr");
-    
+
             const priceCell = document.createElement("td");
             priceCell.textContent = order.price.toFixed(2);
             priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050";
-    
+
             const sizeCell = document.createElement("td");
             sizeCell.textContent = order.size.toLocaleString();
-    
+
             const liquidityCell = document.createElement("td");
             liquidityCell.textContent = order.liquidity.toFixed(2);
-    
+
             row.appendChild(priceCell);
             row.appendChild(sizeCell);
             row.appendChild(liquidityCell);
-    
+
             orderBookTable.appendChild(row);
         });
-    }    
+    }
 
     function triggerDataFetch() {
         const symbol = symbolInput.value.trim().toUpperCase();
@@ -123,52 +180,4 @@ document.addEventListener("DOMContentLoaded", function () {
             triggerDataFetch();
         }
     });
-    
-    let chartInstance = null; // Store reference to the chart
-
-function updatePriceChart(data) {
-    console.log("Updating Price Chart with:", data);
-
-    if (!data.order_flow) {
-        console.error("No valid price data available for the chart.");
-        return;
-    }
-
-    const ctx = document.getElementById("priceChart").getContext("2d");
-
-    // Destroy previous chart instance if it exists
-    if (chartInstance) {
-        chartInstance.destroy();
-    }
-
-    chartInstance = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: ["Open", "High", "Low", "Close"],
-            datasets: [{
-                label: "Price Levels",
-                data: [
-                    data.order_flow.open,
-                    data.order_flow.high,
-                    data.order_flow.low,
-                    data.order_flow.close
-                ],
-                borderColor: "#00ffcc",
-                backgroundColor: "rgba(0, 255, 204, 0.2)",
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: false
-                }
-            }
-        }
-    });
-}
-
-
 });
