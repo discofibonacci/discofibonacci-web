@@ -60,6 +60,24 @@ def get_market_data():
     except Exception as e:
         return jsonify({"error": f"Failed to get ticker '{symbol}' reason: {str(e)}"}), 500
 
+@app.route('/market-depth', methods=['GET'])
+def get_market_depth():
+    symbol = request.args.get('symbol', 'AAPL').upper()
+
+    try:
+        # Simulated order book data for now (Replace with real API integration)
+        order_book = [
+            {"price": round(np.random.uniform(0.99, 1.01) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": np.random.random()},
+            {"price": round(np.random.uniform(1.01, 1.02) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": np.random.random()},
+            {"price": round(np.random.uniform(0.98, 1.00) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": np.random.random()},
+            {"price": round(np.random.uniform(1.02, 1.03) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": np.random.random()},
+        ]
+
+        return jsonify(order_book)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=True)
