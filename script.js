@@ -1,61 +1,67 @@
+// DiscoFibonacci 2.0 - Market Depth & Liquidity Table Heatmap
+// This script dynamically fetches order book data and visualizes market depth
+
 document.addEventListener("DOMContentLoaded", function () {
-    const fetchData = async () => {
-        const symbol = document.getElementById("symbolInput").value.toUpperCase() || "AAPL";
-
-        // Show loading message
-        document.getElementById("orderFlow").innerHTML = "<i>Loading...</i>";
-        document.getElementById("supportLevel").textContent = "Loading...";
-        document.getElementById("rsi").textContent = "Loading...";
-
+    const symbolInput = document.getElementById("symbolInput");
+    const fetchDataBtn = document.getElementById("fetchData");
+    const orderBookTable = document.getElementById("orderBookTable");
+    
+    // Fetch market depth data
+    async function fetchMarketDepth(symbol) {
         try {
-            const response = await fetch(`http://127.0.0.1:10000/market-data?symbol=${symbol}`);
+            const response = await fetch(`http://127.0.0.1:10000/market-depth?symbol=${symbol}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-
             const data = await response.json();
-
-            // Format order flow data
-            document.getElementById("orderFlow").innerHTML = data.order_flow
-    ? `<b>Open:</b> ${data.order_flow.open.toFixed(2)}<br>
-       <b>High:</b> ${data.order_flow.high.toFixed(2)}<br>
-       <b>Low:</b> ${data.order_flow.low.toFixed(2)}<br>
-       <b>Close:</b> ${data.order_flow.close.toFixed(2)}<br>
-       <b>Volume:</b> ${data.order_flow.volume.toLocaleString()}`
-    : "No valid order flow data found.";
-
-
-            // **Fix: Ensure Support & Resistance Display Properly**
-            document.getElementById("supportLevel").innerHTML = 
-    `🔵 <b>Support Levels:</b><br> 
-     S1: ${parseFloat(data.support_level.split(", ")[0]).toFixed(2)}<br> 
-     S2: ${parseFloat(data.support_level.split(", ")[1]).toFixed(2)}<br><br>
-     🔴 <b>Resistance Levels:</b><br> 
-     R1: ${parseFloat(data.resistance_level.split(", ")[0]).toFixed(2)}<br> 
-     R2: ${parseFloat(data.resistance_level.split(", ")[1]).toFixed(2)}`;
-
-            // Display RSI with proper formatting
-            document.getElementById("rsi").textContent = 
-                (typeof data.rsi === "number" && !isNaN(data.rsi)) 
-                    ? `RSI: ${data.rsi.toFixed(2)}` 
-                    : "RSI data unavailable.";
-
+            updateOrderBookTable(data);
         } catch (error) {
-            document.getElementById("orderFlow").textContent = "Error fetching order flow.";
-            document.getElementById("supportLevel").textContent = "Error fetching support/resistance levels.";
-            document.getElementById("rsi").textContent = "Error fetching RSI.";
-            console.error("Error fetching market data:", error);
+            console.error("Error fetching market depth:", error);
+            orderBookTable.innerHTML = "<tr><td colspan='3'>Error fetching data.</td></tr>";
         }
-    };
-
-    // Fetch data when clicking the button
-    document.getElementById("fetchData").addEventListener("click", fetchData);
-
-    // Fetch data when pressing Enter in the input field
-    document.getElementById("symbolInput").addEventListener("keypress", function (event) {
+    }
+    
+    // Update Order Book Table with Market Depth Data
+    function updateOrderBookTable(data) {
+        orderBookTable.innerHTML = ""; // Clear previous data
+        
+        data.forEach((order) => {
+            const row = document.createElement("tr");
+            
+            const priceCell = document.createElement("td");
+            priceCell.textContent = order.price.toFixed(2);
+            priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050"; // Green for bids, Red for asks
+            
+            const sizeCell = document.createElement("td");
+            sizeCell.textContent = order.size.toLocaleString();
+            
+            const heatmapCell = document.createElement("td");
+            heatmapCell.style.backgroundColor = getHeatmapColor(order.liquidity);
+            heatmapCell.textContent = "";
+            
+            row.appendChild(priceCell);
+            row.appendChild(sizeCell);
+            row.appendChild(heatmapCell);
+            
+            orderBookTable.appendChild(row);
+        });
+    }
+    
+    // Generate color intensity for heatmap
+    function getHeatmapColor(liquidity) {
+        const intensity = Math.min(255, Math.floor(liquidity * 2.5));
+        return `rgba(255, 165, 0, ${intensity / 255})`; // Orange gradient
+    }
+    
+    // Fetch market depth on button click
+    fetchDataBtn.addEventListener("click", function () {
+        fetchMarketDepth(symbolInput.value || "AAPL");
+    });
+    
+    // Allow pressing Enter to fetch market data
+    symbolInput.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
-            event.preventDefault();
-            fetchData();
+            fetchMarketDepth(symbolInput.value || "AAPL");
         }
     });
 });
