@@ -142,7 +142,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!orderBookTable) return;
         orderBookTable.innerHTML = "";
 
-        data.forEach(order => {
+        // Separate bids and asks
+        const bids = data.filter(order => order.type === "bid").sort((a, b) => b.price - a.price);
+        const asks = data.filter(order => order.type === "ask").sort((a, b) => a.price - b.price);
+
+        const sortedOrders = [...bids, ...asks]; // Bids at the top, Asks at the bottom
+
+        sortedOrders.forEach(order => {
             const row = document.createElement("tr");
 
             const priceCell = document.createElement("td");
