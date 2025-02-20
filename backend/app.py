@@ -21,6 +21,7 @@ def get_market_data():
     if hist.empty:
         print(f"Yahoo Finance returned empty data for {symbol}. Full response: {ticker.history_metadata}")
         return jsonify({"error": f"No price data found for {symbol}. Response: {ticker.history_metadata}"}), 404
+
 except Exception as e:
     print(f"Error fetching data for {symbol}: {str(e)}")
     return jsonify({"error": f"Failed to get ticker '{symbol}' reason: {str(e)}"}), 500
