@@ -123,5 +123,52 @@ document.addEventListener("DOMContentLoaded", function () {
             triggerDataFetch();
         }
     });
+    
+    let chartInstance = null; // Store reference to the chart
+
+function updatePriceChart(data) {
+    console.log("Updating Price Chart with:", data);
+
+    if (!data.order_flow) {
+        console.error("No valid price data available for the chart.");
+        return;
+    }
+
+    const ctx = document.getElementById("priceChart").getContext("2d");
+
+    // Destroy previous chart instance if it exists
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: ["Open", "High", "Low", "Close"],
+            datasets: [{
+                label: "Price Levels",
+                data: [
+                    data.order_flow.open,
+                    data.order_flow.high,
+                    data.order_flow.low,
+                    data.order_flow.close
+                ],
+                borderColor: "#00ffcc",
+                backgroundColor: "rgba(0, 255, 204, 0.2)",
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+}
+
 
 });
