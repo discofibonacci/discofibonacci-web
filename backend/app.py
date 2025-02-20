@@ -6,12 +6,12 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Allow CORS from the frontend
-CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for now
+# Allow CORS from all origins (update to specific origins later if needed)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/market-data', methods=['GET'])
 def get_market_data():
-    symbol = request.args.get('symbol', 'AAPL')
+    symbol = request.args.get('symbol', 'AAPL').upper()  # Ensure symbol is uppercase
     
     try:
         ticker = yf.Ticker(symbol)
@@ -20,9 +20,9 @@ def get_market_data():
         if hist.empty:
             return jsonify({"error": f"No price data found for {symbol}"}), 404
 
-        latest = hist.iloc[-1]  # Get the most recent candle
+        latest = hist.iloc[-1]  # Get latest price data
 
-        # Compute RSI (if enough data points exist)
+        # Compute RSI if we have enough data points
         if len(hist['Close']) > 14:
             delta = hist['Close'].diff()
             gain = (delta.where(delta > 0, 0)).rolling(14).mean()
@@ -42,7 +42,7 @@ def get_market_data():
                 "close": round(latest['Close'], 4),
                 "volume": int(latest['Volume'])
             },
-            "support_level": "No Data Available",  # Placeholder for future calculations
+            "support_level": "No Data Available",  # Placeholder for future support levels
             "rsi": rsi_value
         }
 
