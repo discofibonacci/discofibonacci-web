@@ -118,3 +118,10 @@ tr:hover {
     justify-content: center;
     align-items: center;
 }
+#priceChart {
+    display: block;
+    margin: 20px auto; /* Centers the chart and adds spacing */
+    padding: 15px; /* Adds padding inside the chart container */
+    background-color: rgba(0, 0, 0, 0.2); /* Optional: Gives a subtle background */
+    border-radius: 10px; /* Rounds the corners */
+}
