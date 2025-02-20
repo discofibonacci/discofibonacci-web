@@ -17,7 +17,7 @@ def health_check():
 
 @app.route('/market-data', methods=['GET'])
 def get_market_data():
-    symbol = request.args.get('symbol', 'AAPL').upper()
+    symbol = request.args.get('symbol', '').upper()
 
     try:
         ticker = yf.Ticker(symbol)
@@ -68,7 +68,7 @@ def get_market_data():
 
 @app.route('/market-depth', methods=['GET'])
 def get_market_depth():
-    symbol = request.args.get('symbol', 'AAPL').upper()
+    symbol = request.args.get('symbol', '').upper()
 
     try:
         # Simulated Order Book Data (Replace with real API later)
