@@ -27,12 +27,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // **Fix: Ensure Support & Resistance Display Properly**
             document.getElementById("supportLevel").innerHTML = 
-                `🔵 <b>Support Levels:</b><br> 
-                 S1: ${data.support_level.split(", ")[0]}<br> 
-                 S2: ${data.support_level.split(", ")[1]}<br><br>
-                 🔴 <b>Resistance Levels:</b><br> 
-                 R1: ${data.resistance_level.split(", ")[0]}<br> 
-                 R2: ${data.resistance_level.split(", ")[1]}`;
+    `🔵 <b>Support Levels:</b><br> 
+     S1: ${parseFloat(data.support_level.split(", ")[0]).toFixed(2)}<br> 
+     S2: ${parseFloat(data.support_level.split(", ")[1]).toFixed(2)}<br><br>
+     🔴 <b>Resistance Levels:</b><br> 
+     R1: ${parseFloat(data.resistance_level.split(", ")[0]).toFixed(2)}<br> 
+     R2: ${parseFloat(data.resistance_level.split(", ")[1]).toFixed(2)}`;
 
             // Display RSI with proper formatting
             document.getElementById("rsi").textContent = 
