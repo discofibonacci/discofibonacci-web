@@ -8,33 +8,35 @@ document.addEventListener("DOMContentLoaded", function () {
     const vwapElement = document.getElementById("vwap");
     const orderBookTable = document.querySelector("#orderBookTable tbody");
     const priceChartCanvas = document.getElementById("priceChart");
-    
 
     let lastClose = null;
     let priceChart = null;
-    Chart.register(Chart.FinancialController, Chart.FinancialElement);
+
+    // Register Candlestick Chart Type
+    Chart.register(
+        window['chartjs-chart-financial'].CandlestickController,
+        window['chartjs-chart-financial'].CandlestickElement
+    );
 
     function updatePriceChart(data) {
         console.log("Updating Price Chart with:", data);
-    
+
         if (!data.candlesticks || data.candlesticks.length === 0) {
             console.error("No valid candlestick data available for the chart.");
             return;
         }
-    
-        const priceChartCanvas = document.getElementById("priceChart");
+
         const ctx = priceChartCanvas.getContext("2d");
-    
+
         // Convert API data into candlestick format
         const candlestickData = data.candlesticks.map(entry => ({
-            t: new Date(entry.time), // Timestamp
+            x: new Date(entry.time),
             o: entry.open,
             h: entry.high,
             l: entry.low,
             c: entry.close
         }));
-    
-        // Chart configuration
+
         const config = {
             type: "candlestick",
             data: {
@@ -49,105 +51,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: {
-                        type: "time",
-                        time: {
-                            unit: "minute"
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
+                    x: { type: "time", time: { unit: "minute" } },
+                    y: { ticks: { font: { size: 12 } } }
                 }
             }
         };
-    
-        // Destroy previous chart instance if it exists
+
         if (window.priceChart) {
             window.priceChart.destroy();
         }
-    
         window.priceChart = new Chart(ctx, config);
-    }
-    
-    function updatePriceChart(data) {
-        console.log("Updating Price Chart with:", data);
-
-        if (!data.order_flow) {
-            console.error("No valid price data available for the chart.");
-            return;
-        }
-
-        console.log("Closing Price:", data.order_flow.close);
-
-        const priceLevels = [
-            data.order_flow.open,
-            data.order_flow.high,
-            data.order_flow.low,
-            data.order_flow.close
-        ];
-
-        if (!priceChart) {
-            const ctx = priceChartCanvas.getContext("2d");
-            priceChart = new Chart(ctx, {
-                type: "candlestick",
-                data: {
-                    labels: ["Open", "High", "Low", "Close"],
-                    datasets: [{
-                        label: "Price Levels",
-                        data: priceLevels,
-                        borderColor: "rgba(0, 255, 255, 0.8)",
-                        backgroundColor: "rgba(0, 255, 255, 0.2)",
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                font: {
-                                    size: 14
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } else {
-            priceChart.data.datasets[0].data = priceLevels;
-            priceChart.update();
-        }
     }
 
     async function fetchMarketData(symbol) {
         try {
             console.log(`Fetching Market Data for: ${symbol}`);
             const response = await fetch(`http://127.0.0.1:10000/market-data?symbol=${symbol}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             const data = await response.json();
             console.log("Market Data Fetched:", data);
 
@@ -172,7 +92,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             vwapElement.innerHTML = `<b>VWAP:</b> ${data.order_flow.vwap.toFixed(2)}`;
             rsiElement.innerHTML = `<b>RSI:</b> ${data.rsi ? data.rsi.toFixed(2) : "Unavailable"}`;
-
             supportElement.innerHTML = `<b>Support Levels:</b><br> ${data.support_level.map(s => `S: ${s}`).join("<br>")}`;
             resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> ${data.resistance_level.map(r => `R: ${r}`).join("<br>")}`;
 
@@ -184,47 +103,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    async function fetchMarketDepth(symbol) {
-        try {
-            console.log(`Fetching Market Depth for: ${symbol}`);
-            const response = await fetch(`http://127.0.0.1:10000/market-depth?symbol=${symbol}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const data = await response.json();
-            console.log("Market Depth Data:", data);
-            updateOrderBookTable(data);
-        } catch (error) {
-            console.error("Error fetching market depth:", error);
-            orderBookTable.innerHTML = "<tr><td colspan='3'>Error fetching data.</td></tr>";
-        }
-    }
-
-    function updateOrderBookTable(data) {
-        if (!orderBookTable) return;
-        orderBookTable.innerHTML = "";
-
-        data.forEach(order => {
-            const row = document.createElement("tr");
-
-            const priceCell = document.createElement("td");
-            priceCell.textContent = order.price.toFixed(2);
-            priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050";
-
-            const sizeCell = document.createElement("td");
-            sizeCell.textContent = order.size.toLocaleString();
-
-            const liquidityCell = document.createElement("td");
-            liquidityCell.textContent = order.liquidity.toFixed(2);
-
-            row.appendChild(priceCell);
-            row.appendChild(sizeCell);
-            row.appendChild(liquidityCell);
-
-            orderBookTable.appendChild(row);
-        });
-    }
-
     function triggerDataFetch() {
         const symbol = symbolInput.value.trim().toUpperCase();
         if (!symbol) {
@@ -233,7 +111,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         console.log(`Fetching Data for Symbol: ${symbol}`);
         fetchMarketData(symbol);
-        fetchMarketDepth(symbol);
     }
 
     fetchDataBtn.addEventListener("click", triggerDataFetch);
