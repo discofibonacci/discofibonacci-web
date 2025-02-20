@@ -7,40 +7,39 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">DISCOFIBONACCI</h1>
-        <h3 class="subtitle">Only those who groove will survive</h3>
-
-        <div class="input-container">
-            <input type="text" id="symbolInput" placeholder="Enter Stock Symbol">
-            <button id="fetchData">Let's Boogie!</button>
-        </div>
-
-        <div class="data-box">
-            <h2>Market Data</h2>
-            <p id="orderFlow"><b>Order Flow:</b> Loading...</p>
-            <p id="rsi"><b>RSI:</b> Loading...</p>
-            <p id="supportLevels"><b>Support Levels:</b> Loading...</p>  <!-- ADDED -->
-            <p id="resistanceLevels"><b>Resistance Levels:</b> Loading...</p>  <!-- ADDED -->
-        </div>        
-
-        <div class="data-box">
-            <h2>Market Depth</h2>
-            <table id="orderBookTable">
-                <thead>
-                    <tr>
-                        <th>Price</th>
-                        <th>Size</th>
-                        <th>Liquidity</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="3">Loading...</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <h1>DISCOFIBONACCI</h1>
+    <p>Only those who groove will survive</p>
+    
+    <input type="text" id="symbolInput" placeholder="Enter Stock Symbol">
+    <button id="fetchData">Let's Boogie!</button>
+    
+    <div class="data-box">
+        <h2>Market Data</h2>
+        <p id="orderFlow"><b>Order Flow:</b> Loading...</p>
+        <p id="vwap"><b>VWAP:</b> Loading...</p>
+        <p id="rsi"><b>RSI:</b> Loading...</p>
+        <p id="supportLevels"><b>Support Levels:</b> Loading...</p>
+        <p id="resistanceLevels"><b>Resistance Levels:</b> Loading...</p>
     </div>
-
+    
+    <div class="market-depth">
+        <h2>Market Depth</h2>
+        <table id="orderBookTable">
+            <thead>
+                <tr>
+                    <th>Price</th>
+                    <th>Size</th>
+                    <th>Liquidity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3">Waiting for data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
     <script src="script.js"></script>
 </body>
 </html>
