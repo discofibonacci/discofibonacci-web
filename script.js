@@ -17,12 +17,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Format order flow data
             document.getElementById("orderFlow").innerHTML = data.order_flow
-                ? `<b>Open:</b> ${data.order_flow.open}<br>
-                   <b>High:</b> ${data.order_flow.high}<br>
-                   <b>Low:</b> ${data.order_flow.low}<br>
-                   <b>Close:</b> ${data.order_flow.close}<br>
-                   <b>Volume:</b> ${data.order_flow.volume}`
-                : "No valid order flow data found.";
+    ? `<b>Open:</b> ${data.order_flow.open.toFixed(2)}<br>
+       <b>High:</b> ${data.order_flow.high.toFixed(2)}<br>
+       <b>Low:</b> ${data.order_flow.low.toFixed(2)}<br>
+       <b>Close:</b> ${data.order_flow.close.toFixed(2)}<br>
+       <b>Volume:</b> ${data.order_flow.volume.toLocaleString()}`
+    : "No valid order flow data found.";
+
 
             // **Fix: Ensure Support & Resistance Display Properly**
             document.getElementById("supportLevel").innerHTML = 

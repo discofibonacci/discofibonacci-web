@@ -37,7 +37,7 @@ def get_market_data():
         else:
             rsi = None
 
-        # **🔥 Fix: Calculate Support & Resistance using Pivot Points**
+        # Calculate support & resistance using pivot points
         pivot = (latest["High"] + latest["Low"] + latest["Close"]) / 3
         resistance_1 = (2 * pivot) - latest["Low"]
         support_1 = (2 * pivot) - latest["High"]
@@ -46,15 +46,15 @@ def get_market_data():
 
         return jsonify({
             "order_flow": {
-                "close": latest['Close'],
-                "high": latest['High'],
-                "low": latest['Low'],
-                "open": latest['Open'],
-                "volume": latest['Volume']
+                "close": round(latest['Close'], 2),
+                "high": round(latest['High'], 2),
+                "low": round(latest['Low'], 2),
+                "open": round(latest['Open'], 2),
+                "volume": int(latest['Volume'])
             },
             "rsi": None if rsi is None else round(rsi.iloc[-1], 2),
-            "support_level": f"{support_1:.2f}, {support_2:.2f}",
-            "resistance_level": f"{resistance_1:.2f}, {resistance_2:.2f}"
+            "support_level": f"{round(support_1, 2)}, {round(support_2, 2)}",
+            "resistance_level": f"{round(resistance_1, 2)}, {round(resistance_2, 2)}"
         })
 
     except Exception as e:
