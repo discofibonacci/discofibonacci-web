@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const fetchDataBtn = document.getElementById("fetchData");
     const orderFlowElement = document.getElementById("orderFlow");
     const rsiElement = document.getElementById("rsi");
+    const supportLevelsElement = document.getElementById("supportLevels");
+    const resistanceLevelsElement = document.getElementById("resistanceLevels");
     const orderBookTable = document.querySelector("#orderBookTable tbody");
 
     let lastClose = null; // Store last close price for color change
@@ -17,13 +19,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             console.log("Market Data Fetched:", data);
 
-            // Ensure elements exist before updating
-            if (!orderFlowElement || !rsiElement) {
+            if (!orderFlowElement || !rsiElement || !supportLevelsElement || !resistanceLevelsElement) {
                 console.error("Market Data Elements Not Found in DOM");
                 return;
             }
 
-            // Handle missing data safely
             if (!data.order_flow) {
                 orderFlowElement.innerHTML = "<b>No valid order flow data found.</b>";
                 return;
@@ -40,6 +40,15 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
 
             rsiElement.innerHTML = `<b>RSI:</b> ${data.rsi ? data.rsi.toFixed(2) : "Unavailable"}`;
+
+            // Handle support & resistance levels
+            supportLevelsElement.innerHTML = data.support_level
+                ? `<b>Support Levels:</b> ${data.support_level.split(", ").map(level => `<br>S: ${level}`).join("")}`
+                : "<b>Support Levels:</b> No data available.";
+
+            resistanceLevelsElement.innerHTML = data.resistance_level
+                ? `<b>Resistance Levels:</b> ${data.resistance_level.split(", ").map(level => `<br>R: ${level}`).join("")}`
+                : "<b>Resistance Levels:</b> No data available.";
 
         } catch (error) {
             console.error("Error fetching market data:", error);
