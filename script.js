@@ -24,12 +24,16 @@ document.addEventListener("DOMContentLoaded", function () {
                    <b>Volume:</b> ${data.order_flow.volume}`
                 : "No valid order flow data found.";
 
-            // Display support & resistance levels
-            document.getElementById("supportLevel").innerHTML = 
-                `S1: ${data.support_level.split(", ")[0]}<br>
-                 S2: ${data.support_level.split(", ")[1]}<br>
-                 R1: ${data.resistance_level.split(", ")[0]}<br>
-                 R2: ${data.resistance_level.split(", ")[1]}`;
+            // **Fix: Handle Undefined Support & Resistance Levels**
+            const supportText = data.support_level 
+                ? `S1: ${data.support_level.split(", ")[0]}<br> S2: ${data.support_level.split(", ")[1]}` 
+                : "Support Levels: Not Available.";
+
+            const resistanceText = data.resistance_level 
+                ? `R1: ${data.resistance_level.split(", ")[0]}<br> R2: ${data.resistance_level.split(", ")[1]}` 
+                : "Resistance Levels: Not Available.";
+
+            document.getElementById("supportLevel").innerHTML = `${supportText}<br>${resistanceText}`;
 
             // Display RSI with proper formatting
             document.getElementById("rsi").textContent = 
@@ -39,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } catch (error) {
             document.getElementById("orderFlow").textContent = "Error fetching order flow.";
-            document.getElementById("supportLevel").textContent = "Error fetching support level.";
+            document.getElementById("supportLevel").textContent = "Error fetching support/resistance levels.";
             document.getElementById("rsi").textContent = "Error fetching RSI.";
             console.error("Error fetching market data:", error);
         }
@@ -51,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Fetch data when pressing Enter in the input field
     document.getElementById("symbolInput").addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
-            event.preventDefault(); // Prevents accidental form submission if inside a <form>
+            event.preventDefault();
             fetchData();
         }
     });
