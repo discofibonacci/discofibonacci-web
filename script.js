@@ -12,14 +12,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let lastClose = null;
     let priceChart = null;
 
-    // Check if Financial Chart Plugin is Available Before Registering
-    if (window['chartjs-chart-financial']) {
-        const { CandlestickController, CandlestickElement, OhlcController, OhlcElement } = window['chartjs-chart-financial'];
-        Chart.register(CandlestickController, CandlestickElement, OhlcController, OhlcElement);
-        console.log("✅ Candlestick and OHLC charts registered!");
-    } else {
-        console.error("❌ Chart.js Financial plugin not loaded! Candlestick charts may not work.");
+    function registerChartFinancial() {
+        if (window['chartjs-chart-financial']) {
+            const { CandlestickController, CandlestickElement, OhlcController, OhlcElement } = window['chartjs-chart-financial'];
+            Chart.register(CandlestickController, CandlestickElement, OhlcController, OhlcElement);
+            console.log("✅ Chart.js Financial plugin successfully registered.");
+        } else {
+            console.error("❌ Chart.js Financial plugin not loaded. Retrying in 500ms...");
+            setTimeout(registerChartFinancial, 500); // Try again in 500ms
+        }
     }
+
+    registerChartFinancial(); // Call function to ensure registration
 
     function updatePriceChart(data) {
         console.log("Updating Price Chart with:", data);
@@ -31,7 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const ctx = priceChartCanvas.getContext("2d");
 
-        // Convert API data into candlestick format
         const candlestickData = data.candlesticks.map(entry => ({
             x: new Date(entry.time),
             o: entry.open,
