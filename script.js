@@ -66,49 +66,28 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function updateOrderBookTable(data, symbol) {
+    function updateOrderBookTable(data) {
         if (!orderBookTable) return;
         orderBookTable.innerHTML = ""; // Clears old data before inserting new
-
+    
         data.forEach(order => {
-            if (order.symbol !== symbol) return; // Ensure the correct symbol is displayed
-
             const row = document.createElement("tr");
-
+    
             const priceCell = document.createElement("td");
             priceCell.textContent = order.price.toFixed(2);
             priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050";
-
+    
             const sizeCell = document.createElement("td");
             sizeCell.textContent = order.size.toLocaleString();
-
+    
             const liquidityCell = document.createElement("td");
             liquidityCell.textContent = order.liquidity.toFixed(2);
-
+    
             row.appendChild(priceCell);
             row.appendChild(sizeCell);
             row.appendChild(liquidityCell);
-
+    
             orderBookTable.appendChild(row);
         });
     }
-
-    function triggerDataFetch() {
-        const symbol = symbolInput.value.trim().toUpperCase();
-        if (!symbol) {
-            console.log("No symbol entered. Data fetch skipped.");
-            return;
-        }
-        console.log(`Fetching Data for Symbol: ${symbol}`);
-        fetchMarketData(symbol);
-        fetchMarketDepth(symbol);
-    }
-
-    fetchDataBtn.addEventListener("click", triggerDataFetch);
-    symbolInput.addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-            triggerDataFetch();
-        }
-    });
-
-});
+    
