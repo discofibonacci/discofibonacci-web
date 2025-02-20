@@ -1,8 +1,33 @@
-// DiscoFibonacci 2.0 - Market Depth Table Integration
 document.addEventListener("DOMContentLoaded", function () {
     const symbolInput = document.getElementById("symbolInput");
     const fetchDataBtn = document.getElementById("fetchData");
+    const orderFlowElement = document.getElementById("orderFlow");
+    const rsiElement = document.getElementById("rsi");
     const orderBookTable = document.querySelector("#orderBookTable tbody");
+
+    async function fetchMarketData(symbol) {
+        try {
+            const response = await fetch(`http://127.0.0.1:10000/market-data?symbol=${symbol}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            // Ensure market data elements update correctly
+            orderFlowElement.textContent = data.order_flow
+                ? `Open: ${data.order_flow.open.toFixed(2)}\nHigh: ${data.order_flow.high.toFixed(2)}\nLow: ${data.order_flow.low.toFixed(2)}\nClose: ${data.order_flow.close.toFixed(2)}\nVolume: ${data.order_flow.volume.toLocaleString()}`
+                : "No valid order flow data found.";
+
+            rsiElement.textContent = data.rsi
+                ? `RSI: ${data.rsi.toFixed(2)}`
+                : "RSI data unavailable.";
+
+        } catch (error) {
+            console.error("Error fetching market data:", error);
+            orderFlowElement.textContent = "Error fetching order flow.";
+            rsiElement.textContent = "Error fetching RSI.";
+        }
+    }
 
     async function fetchMarketDepth(symbol) {
         try {
@@ -19,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateOrderBookTable(data) {
-        if (!orderBookTable) return;  // Prevents errors if the table isn't found
+        if (!orderBookTable) return;
         orderBookTable.innerHTML = "";
 
         data.forEach(order => {
@@ -27,35 +52,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const priceCell = document.createElement("td");
             priceCell.textContent = order.price.toFixed(2);
-            priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050"; // Green for bids, Red for asks
+            priceCell.style.color = order.type === "bid" ? "#00ff00" : "#ff5050";
 
             const sizeCell = document.createElement("td");
             sizeCell.textContent = order.size.toLocaleString();
 
-            const heatmapCell = document.createElement("td");
-            heatmapCell.style.backgroundColor = getHeatmapColor(order.liquidity);
-            heatmapCell.textContent = "";
+            const liquidityCell = document.createElement("td");
+            liquidityCell.textContent = order.liquidity.toFixed(2); // Fix empty liquidity column
 
             row.appendChild(priceCell);
             row.appendChild(sizeCell);
-            row.appendChild(heatmapCell);
+            row.appendChild(liquidityCell);
 
             orderBookTable.appendChild(row);
         });
     }
 
-    function getHeatmapColor(liquidity) {
-        const intensity = Math.min(255, Math.floor(liquidity * 2.5));
-        return `rgba(255, 165, 0, ${intensity / 255})`;
-    }
-
     fetchDataBtn.addEventListener("click", function () {
-        fetchMarketDepth(symbolInput.value || "AAPL");
+        const symbol = symbolInput.value.trim().toUpperCase() || "AAPL";
+        fetchMarketData(symbol);
+        fetchMarketDepth(symbol);
     });
 
     symbolInput.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
-            fetchMarketDepth(symbolInput.value || "AAPL");
+            const symbol = symbolInput.value.trim().toUpperCase() || "AAPL";
+            fetchMarketData(symbol);
+            fetchMarketDepth(symbol);
         }
     });
+
+    // Auto-load default symbol on page load
+    fetchMarketData("AAPL");
+    fetchMarketDepth("AAPL");
 });
