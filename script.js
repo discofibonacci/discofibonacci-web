@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("fetchData").addEventListener("click", async function () {
         const symbol = document.getElementById("symbolInput").value || "AAPL";
         try {
-            const response = await fetch(`https://discofibonacci-web.onrender.com/market-data?symbol=${symbol}`);
+            const response = await fetch("http://127.0.0.1:10000/market-data?symbol=AAPL");
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
