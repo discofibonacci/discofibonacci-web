@@ -58,20 +58,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function fetchMarketDepth(symbol) {
+        console.log(`Fetching Market Depth for: ${symbol}`); // Debugging log
         try {
             const response = await fetch(`http://127.0.0.1:10000/market-depth?symbol=${symbol}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
+            console.log("Market Depth Data Fetched:", data); // Debugging log
             updateOrderBookTable(data);
         } catch (error) {
             console.error("Error fetching market depth:", error);
-            if (orderBookTable) {
-                orderBookTable.innerHTML = "<tr><td colspan='3'>Error fetching data.</td></tr>";
-            }
+            orderBookTable.innerHTML = "<tr><td colspan='3'>Error fetching data.</td></tr>";
         }
     }
+    
 
     function updateOrderBookTable(data) {
         if (!orderBookTable) return;
