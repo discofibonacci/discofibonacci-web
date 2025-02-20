@@ -24,16 +24,14 @@ document.addEventListener("DOMContentLoaded", function () {
                    <b>Volume:</b> ${data.order_flow.volume}`
                 : "No valid order flow data found.";
 
-            // **Fix: Handle Undefined Support & Resistance Levels**
-            const supportText = data.support_level 
-                ? `S1: ${data.support_level.split(", ")[0]}<br> S2: ${data.support_level.split(", ")[1]}` 
-                : "Support Levels: Not Available.";
-
-            const resistanceText = data.resistance_level 
-                ? `R1: ${data.resistance_level.split(", ")[0]}<br> R2: ${data.resistance_level.split(", ")[1]}` 
-                : "Resistance Levels: Not Available.";
-
-            document.getElementById("supportLevel").innerHTML = `${supportText}<br>${resistanceText}`;
+            // **Fix: Ensure Support & Resistance Display Properly**
+            document.getElementById("supportLevel").innerHTML = 
+                `🔵 <b>Support Levels:</b><br> 
+                 S1: ${data.support_level.split(", ")[0]}<br> 
+                 S2: ${data.support_level.split(", ")[1]}<br><br>
+                 🔴 <b>Resistance Levels:</b><br> 
+                 R1: ${data.resistance_level.split(", ")[0]}<br> 
+                 R2: ${data.resistance_level.split(", ")[1]}`;
 
             // Display RSI with proper formatting
             document.getElementById("rsi").textContent = 
@@ -57,6 +55,4 @@ document.addEventListener("DOMContentLoaded", function () {
         if (event.key === "Enter") {
             event.preventDefault();
             fetchData();
-        }
-    });
-});
+       
