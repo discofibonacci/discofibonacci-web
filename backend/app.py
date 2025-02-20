@@ -65,12 +65,12 @@ def get_market_depth():
     symbol = request.args.get('symbol', 'AAPL').upper()
 
     try:
-        # Simulated order book data for now (Replace with real API integration)
+        # Simulated Order Book Data (Replace with real API later)
         order_book = [
-            {"price": round(np.random.uniform(0.99, 1.01) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": np.random.random()},
-            {"price": round(np.random.uniform(1.01, 1.02) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": np.random.random()},
-            {"price": round(np.random.uniform(0.98, 1.00) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": np.random.random()},
-            {"price": round(np.random.uniform(1.02, 1.03) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": np.random.random()},
+            {"price": round(np.random.uniform(0.99, 1.01) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2)},
+            {"price": round(np.random.uniform(1.01, 1.02) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2)},
+            {"price": round(np.random.uniform(0.98, 1.00) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2)},
+            {"price": round(np.random.uniform(1.02, 1.03) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2)},
         ]
 
         return jsonify(order_book)

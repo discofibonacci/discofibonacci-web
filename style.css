@@ -45,3 +45,33 @@ body {
     margin-top: 20px;
     box-shadow: 0 0 10px cyan;
 }
+
+.market-depth-container {
+    background-color: rgba(20, 20, 20, 0.9);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+#orderBookTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#orderBookTable th, #orderBookTable td {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #333;
+}
+
+#orderBookTable th {
+    color: #00ffff;
+}
+
+#orderBookTable tbody tr:nth-child(odd) {
+    background-color: rgba(50, 50, 50, 0.5);
+}
+
+#orderBookTable tbody tr:nth-child(even) {
+    background-color: rgba(30, 30, 30, 0.5);
+}
