@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const vwapElement = document.getElementById("vwap");
     const orderBookTable = document.querySelector("#orderBookTable tbody");
     const priceChartCanvas = document.getElementById("priceChart");
+    Chart.register(Chart.FinancialController, Chart.FinancialElement);
 
     let lastClose = null;
     let priceChart = null;
