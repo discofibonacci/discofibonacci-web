@@ -1,7 +1,6 @@
 import os
 import yfinance as yf
 import numpy as np
-import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -17,7 +16,7 @@ def health_check():
 
 @app.route('/market-data', methods=['GET'])
 def get_market_data():
-    symbol = request.args.get('symbol', '').upper()
+    symbol = request.args.get('symbol', 'AAPL').upper()
 
     try:
         ticker = yf.Ticker(symbol)
@@ -28,9 +27,9 @@ def get_market_data():
 
         latest = hist.iloc[-1]
 
-        # VWAP Calculation
-        hist["VWAP"] = (hist["Close"] * hist["Volume"]).cumsum() / hist["Volume"].cumsum()
-        vwap = hist["VWAP"].iloc[-1]
+        # Compute VWAP
+        hist['VWAP'] = (hist['Close'] * hist['Volume']).cumsum() / hist['Volume'].cumsum()
+        vwap = round(hist['VWAP'].iloc[-1], 2)
 
         # Compute RSI
         if len(hist['Close']) > 14:
@@ -56,7 +55,7 @@ def get_market_data():
                 "low": round(latest['Low'], 2),
                 "open": round(latest['Open'], 2),
                 "volume": int(latest['Volume']),
-                "vwap": round(vwap, 2)
+                "vwap": vwap
             },
             "rsi": None if rsi is None else round(rsi.iloc[-1], 2),
             "support_level": [round(support_1, 2), round(support_2, 2)],
@@ -71,25 +70,18 @@ def get_market_depth():
     symbol = request.args.get('symbol', 'AAPL').upper()
 
     try:
-        ticker = yf.Ticker(symbol)
-        order_book_data = ticker.history(period="1d", interval="1m")
-
-        if order_book_data.empty:
-            return jsonify({"error": f"No order book data found for {symbol}."}), 404
-
-        latest_bid = round(order_book_data["Close"].iloc[-1] * 0.999, 2)  # Approximate bid
-        latest_ask = round(order_book_data["Close"].iloc[-1] * 1.001, 2)  # Approximate ask
-
+        # Simulated Order Book Data (Replace with real API later)
         order_book = [
-            {"price": latest_bid, "size": np.random.randint(200, 500), "type": "bid", "liquidity": round(np.random.uniform(0.1, 1.0), 2)},
-            {"price": latest_ask, "size": np.random.randint(200, 500), "type": "ask", "liquidity": round(np.random.uniform(0.1, 1.0), 2)}
+            {"price": round(np.random.uniform(0.99, 1.01) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2), "symbol": symbol},
+            {"price": round(np.random.uniform(1.01, 1.02) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2), "symbol": symbol},
+            {"price": round(np.random.uniform(0.98, 1.00) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "bid", "liquidity": round(np.random.random(), 2), "symbol": symbol},
+            {"price": round(np.random.uniform(1.02, 1.03) * 245.00, 2), "size": np.random.randint(100, 1000), "type": "ask", "liquidity": round(np.random.random(), 2), "symbol": symbol}
         ]
 
         return jsonify(order_book)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))

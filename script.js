@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!priceChart) {
             const ctx = priceChartCanvas.getContext("2d");
             priceChart = new Chart(ctx, {
-                type: "line",
+                type: "candlestick",
                 data: {
                     labels: ["Open", "High", "Low", "Close"],
                     datasets: [{
@@ -142,13 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!orderBookTable) return;
         orderBookTable.innerHTML = "";
 
-        // Separate bids and asks
-        const bids = data.filter(order => order.type === "bid").sort((a, b) => b.price - a.price);
-        const asks = data.filter(order => order.type === "ask").sort((a, b) => a.price - b.price);
-
-        const sortedOrders = [...bids, ...asks]; // Bids at the top, Asks at the bottom
-
-        sortedOrders.forEach(order => {
+        data.forEach(order => {
             const row = document.createElement("tr");
 
             const priceCell = document.createElement("td");
