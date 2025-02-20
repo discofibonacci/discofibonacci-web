@@ -9,6 +9,11 @@ app = Flask(__name__)
 # Allow CORS from all origins (update to specific origins later if needed)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Health check endpoint for Render
+@app.route('/healthz', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
 @app.route('/market-data', methods=['GET'])
 def get_market_data():
     symbol = request.args.get('symbol', 'AAPL').upper()  # Ensure symbol is uppercase
