@@ -40,8 +40,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             rsiElement.innerHTML = `<b>RSI:</b> ${data.rsi ? data.rsi.toFixed(2) : "Unavailable"}`;
 
-            supportElement.innerHTML = `<b>Support Levels:</b><br> S: ${data.support_level.replace(/,/g, "<br> S: ")}`;
-            resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> R: ${data.resistance_level.replace(/,/g, "<br> R: ")}`;
+            supportElement.innerHTML = `<b>Support Levels:</b><br> S: ${data.support_level ? data.support_level.replace(/,/g, "<br> S: ") : "N/A"}`;
+            resistanceElement.innerHTML = `<b>Resistance Levels:</b><br> R: ${data.resistance_level ? data.resistance_level.replace(/,/g, "<br> R: ") : "N/A"}`;
 
         } catch (error) {
             console.error("Error fetching market data:", error);
@@ -59,18 +59,20 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             const data = await response.json();
             console.log("Market Depth Data:", data);
-            updateOrderBookTable(data);
+            updateOrderBookTable(data, symbol);
         } catch (error) {
             console.error("Error fetching market depth:", error);
             orderBookTable.innerHTML = "<tr><td colspan='3'>Error fetching data.</td></tr>";
         }
     }
 
-    function updateOrderBookTable(data) {
+    function updateOrderBookTable(data, symbol) {
         if (!orderBookTable) return;
         orderBookTable.innerHTML = ""; // Clears old data before inserting new
 
         data.forEach(order => {
+            if (order.symbol !== symbol) return; // Ensure the correct symbol is displayed
+
             const row = document.createElement("tr");
 
             const priceCell = document.createElement("td");
@@ -92,7 +94,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function triggerDataFetch() {
-        const symbol = symbolInput.value.trim().toUpperCase() || "AAPL";
+        const symbol = symbolInput.value.trim().toUpperCase();
+        if (!symbol) {
+            console.log("No symbol entered. Data fetch skipped.");
+            return;
+        }
         console.log(`Fetching Data for Symbol: ${symbol}`);
         fetchMarketData(symbol);
         fetchMarketDepth(symbol);
@@ -105,6 +111,4 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Auto-load default symbol on page load
-    triggerDataFetch();
 });
