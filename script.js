@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
         orderBookTable.innerHTML = ""; // Clears old data before inserting new
 
         data.forEach(order => {
-            if (order.symbol !== symbol) return; // Ensure the correct symbol is displayed
+            if (order.symbol && order.symbol !== symbol) return; // Ensure the correct symbol is displayed
 
             const row = document.createElement("tr");
 
