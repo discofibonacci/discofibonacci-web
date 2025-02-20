@@ -17,6 +17,11 @@ def get_market_data():
         ticker = yf.Ticker(symbol)
         hist = ticker.history(period="1d", interval="5m")
 
+# Debugging: Check if Yahoo Finance returned empty data
+if hist.empty:
+    print(f"Yahoo Finance returned empty data for {symbol}. Full response: {ticker.history_metadata}")
+    return jsonify({"error": f"No price data found for {symbol}. Response: {ticker.history_metadata}"}), 404
+
         if hist.empty:
             return jsonify({"error": f"No price data found for {symbol}"}), 404
 
